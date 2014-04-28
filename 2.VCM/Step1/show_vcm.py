@@ -10,9 +10,14 @@ import matplotlib.pyplot as plt
 def main(input='out/200901/vcm_2009-01-01T00-07-47ZN.nc4'):
     
     vcm = da.read_nc(input)
-    vcm05 = vcm['vcm_05km']
-    plt.pcolormesh(vcm05.labels[0], vcm05.labels[1], vcm05.values.T)
-    plt.colorbar()
+    i = 1
+    for field in vcm:
+        if field.startswith('vcm'):
+            plt.subplot(4, 1, i)
+            va = vcm[field]
+            plt.pcolormesh(va.labels[0], va.labels[1], va.values.T)
+            plt.title(field)
+            i += 1
     plt.show()
 
 
