@@ -13,7 +13,7 @@ def grid_vcm_from_vcm_orbit(vcm_orbit, lstep=2.):
     # ~8 seconds for 1 vcm_XXkm and there's three of those.
     # 5 seconds by moving the DimArray creation at the end
     # 2.7 seconds by avoiding the use of a DimArray in the middle
-    # 0.5 seconds by recognizing zero cases
+    # 0.5 seconds by special-casing zero cases
     
     # create vcm_3d grid
     lonbins = np.r_[-180:180+lstep:lstep]
@@ -30,7 +30,7 @@ def grid_vcm_from_vcm_orbit(vcm_orbit, lstep=2.):
     
     dataset = da.Dataset()
 
-    for field in ['vcm_05km']:
+    for field in data:
         
         if not field.startswith('vcm_'):
             continue
