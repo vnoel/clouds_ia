@@ -48,5 +48,8 @@ def test_day_run():
     grid_files = glob.glob('out/200901/vcm_lat_*.nc4')
         
     assert len(orbit_files)==len(grid_files)
-    assert False
-        
+    
+    
+if __name__=='__main__':
+    import plac
+    plac.call(main)
