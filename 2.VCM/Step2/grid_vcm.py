@@ -9,6 +9,7 @@ import dimarray as da
 def grid_vcm_from_vcm_orbit(vcm_orbit, lstep=2.):
     
     # FIXME : this is very slow apparently : 24 seconds for one vcm orbit. Not good.
+    # ~8 seconds for 1 vcm_XXkm and there's three of those.
     
     # create vcm_3d grid
     lonbins = np.r_[-180:180+lstep:lstep]
@@ -21,27 +22,28 @@ def grid_vcm_from_vcm_orbit(vcm_orbit, lstep=2.):
     plat = data['lat'].values
     
     altitude = data['vcm_05km'].labels[1]
+    nalt = altitude.shape[0]
     
     dataset = da.Dataset()
 
-    for field in data:
+    for field in ['vcm_05km']:
         if not field.startswith('vcm_'):
             continue
         this_vcm = data[field]
-        vcm_3d = da.DimArray(labels=[lonbins, latbins, altitude], dims=['lon', 'lat', 'altitude'], dtype='uint8')
-        nprof = da.DimArray(labels=[lonbins, latbins], dims=['lon', 'lat'], dtype='uint8')
-        for lon in lonbins:
+        vcm_3d = np.zeros([nlon, nlat, nalt], dtype='uint16')
+        nprof = np.zeros([nlon, nlat], dtype='uint16')
+        for ilon, lon in enumerate(lonbins):
             idxlon = (plon >= lon) & (plon < (lon + lstep))
             if idxlon.sum() == 0:
                 continue
             vcm_slice = this_vcm.ix[idxlon,:]
             lat_slice = plat[idxlon]
-            for lat in latbins:
+            for ilat, lat in enumerate(latbins):
                 idx = (lat_slice >= lat) & (lat_slice < (lat + lstep))
-                vcm_3d[lon, lat, :] = np.sum(vcm_slice.ix[idx,:], axis=0)
-                nprof[lon, lat] = np.sum(idx)
-        dataset[field] = vcm_3d
-        dataset['nprof_' + field] = nprof
+                vcm_3d[ilon, ilat, :] = np.sum(vcm_slice.ix[idx,:], axis=0)
+                nprof[ilon, ilat] = np.sum(idx)
+        dataset[field] = da.DimArray(vcm_3d, labels=[lonbins, latbins, altitude], dims=['lon', 'lat', 'altitude'])
+        dataset['nprof_' + field] = da.DimArray(nprof, labels=[lonbins, latbins], dims=['lon', 'lat'])
     
     return dataset
 
