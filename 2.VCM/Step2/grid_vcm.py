@@ -8,6 +8,8 @@ import dimarray as da
 
 def grid_vcm_from_vcm_orbit(vcm_orbit, lstep=2.):
     
+    # FIXME : this is very slow apparently : 24 seconds for one vcm orbit. Not good.
+    
     # create vcm_3d grid
     lonbins = np.r_[-180:180+lstep:lstep]
     latbins = np.r_[-90:90+lstep:lstep]
