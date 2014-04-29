@@ -8,8 +8,20 @@ from datetime import datetime, timedelta
 import calipso_local
 
 
-def main(year=2007, month=None, day=None):
+def process_l2_orbits_period(start, end):
     
+    current = start
+    while current <= end:
+        
+        l2files = calipso_local.l2_night_files(current.year, current.month, current.day)
+        for l2file in l2files:
+            vcm_file_from_l2_orbit(l2file, where='./out/%04d%02d/' % (current.year, current.month))
+        
+        current += timedelta(days=1)
+
+
+def main(year=2009, month=None, day=None):
+
     if day is not None and month is not None:
         year, month, day = int(year), int(month), int(day)
         start = datetime(year, month, day)
@@ -23,15 +35,8 @@ def main(year=2007, month=None, day=None):
         start = datetime(year, 1, 1)
         end = datetime(year, 12, 31)
 
-    current = start
-    while current <= end:
-        
-        l2files = calipso_local.l2_night_files(current.year, current.month, current.day)
-        for l2file in l2files:
-            vcm_file_from_l2_orbit(l2file, where='./out/%04d%02d/' % (current.year, current.month))        
-        
-        current += timedelta(days=1)
-
+    process_l2_orbits_period(start, end)
+    
 
 def test_day_run():
     
