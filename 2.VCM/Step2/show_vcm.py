@@ -53,6 +53,7 @@ def main(year=2009, month=1, day=1):
     show_files(grid_files)
     
     mask = 'out/%04d%02d/vcm_lat_%04d-%02d*.nc4' % (year, month, year, month)
+    grid_files = glob.glob(mask)
     show_files(grid_files)
     
     plt.show()
