@@ -28,18 +28,32 @@ def show_file(filename):
     pcolor_vcm(vcm_lonlat)
 
 
+def aggregate_arrays_from_files(files, array_name, summed_along=None):
+    
+    aggregated = None
+
+    for f in files:
+
+        data = da.read_nc(f)
+        array = data[array_name]
+
+        if summed_along is not None:
+            array = array.sum(axis=summed_along)
+            
+        if aggregated is None:
+            aggregated = array
+        else:
+            aggregated += array
+
+    return aggregated
+
+
 def show_files(files):
     
-    vcm_lonlat = None
-    for f in files:
-        data = da.read_nc(f)
-        vcm05 = data['vcm_05km']
-        if vcm_lonlat is None:
-            vcm_lonlat = vcm05.sum(axis='altitude')
-        else:
-            vcm_lonlat += vcm05.sum(axis='altitude')
-    
-    pcolor_vcm(vcm_lonlat)
+    vcm = aggregate_arrays_from_files(files, 'vcm_05km', 'altitude')
+    nprof = aggregate_arrays_from_files(files, 'nprof')
+    cf = vcm / nprof
+    pcolor_vcm(cf)
 
 
 def main(year=2009, month=1, day=1):
