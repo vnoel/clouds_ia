@@ -59,11 +59,16 @@ def show_files(files, title):
     cloudypoints = vcm / nprof
     cloudypoints[nprof==0] = 0
     pcolor_vcm(cloudypoints, 'cloudy points in profiles : ' + title)
+    plt.clim(0,20)
 
 
-def main(year=2009, month=1, day=1):
+def main(year=2007, month=1, day=1):
     
     import glob
+    
+    year = int(year)
+    month = int(month)
+    day = int(day)
     
     mask = 'out/%04d%02d/vcm_lat_%04d-%02d-%02d*.nc4' % (year, month, year, month, day)
     grid_files = glob.glob(mask)
