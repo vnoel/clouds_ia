@@ -28,7 +28,7 @@ def grid_vcm_from_vcm_orbit(vcm_orbit, lstep=2.):
     altitude = data['vcm_05km'].labels[1]
     nalt = altitude.shape[0]
     
-    dataset = da.Dataset()
+    out = da.Dataset()
 
     for field in data:
         
@@ -58,10 +58,11 @@ def grid_vcm_from_vcm_orbit(vcm_orbit, lstep=2.):
                 nprof[ilon, ilat] = this_nprof
                 vcm_3d[ilon, ilat, :] = np.sum(vcm_slice[idx,:], axis=0)
         
-        dataset[field] = da.DimArray(vcm_3d, labels=[lonbins, latbins, altitude], dims=['lon', 'lat', 'altitude'])
-        dataset['nprof_' + field] = da.DimArray(nprof, labels=[lonbins, latbins], dims=['lon', 'lat'])
+        out[field] = da.DimArray(vcm_3d, labels=[lonbins, latbins, altitude], dims=['lon', 'lat', 'altitude'])
+        if 'nprof' not in out:
+            out['nprof'] = da.DimArray(nprof, labels=[lonbins, latbins], dims=['lon', 'lat'])
     
-    return dataset
+    return out
 
 
 def grid_vcm_file_from_vcm_orbit(vcm_orbit, where='./out/'):
