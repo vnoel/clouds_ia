@@ -63,12 +63,12 @@ def main(year=2009, month=1, day=1):
     mask = 'out/%04d%02d/vcm_lat_%04d-%02d-%02d*.nc4' % (year, month, year, month, day)
     grid_files = glob.glob(mask)
     
-    show_file(grid_files[0])
-    show_files(grid_files)
+    show_file(grid_files[0], 'orbit = ' + grid_files[0])
+    show_files(grid_files, 'date = %04d-%02d-%02d' % (year, month, day))
     
     mask = 'out/%04d%02d/vcm_lat_%04d-%02d*.nc4' % (year, month, year, month)
     grid_files = glob.glob(mask)
-    show_files(grid_files)
+    show_files(grid_files, 'month = %04d-%02d' % (year, month))
     
     plt.show()
     
