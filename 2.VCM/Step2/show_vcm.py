@@ -13,7 +13,7 @@ def pcolor_vcm(vcm, title=None):
 
     m = Basemap()
 
-    plt.figure()
+    plt.figure(figsize=[10,5])
     m.pcolormesh(vcm.labels[0], vcm.labels[1], vcm.values.T, cmap='BuPu')
     m.drawcoastlines()
     plt.colorbar()
