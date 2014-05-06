@@ -7,7 +7,7 @@ import dimarray as da
 import matplotlib.pyplot as plt
 
 
-def pcolor_vcm(vcm):
+def pcolor_vcm(vcm, title=None):
 
     from mpl_toolkits.basemap import Basemap
 
@@ -17,20 +17,15 @@ def pcolor_vcm(vcm):
     m.pcolormesh(vcm.labels[0], vcm.labels[1], vcm.values.T, cmap='BuPu')
     m.drawcoastlines()
     plt.colorbar()
-
-
-def show_file(filename):
-    
-    data = da.read_nc(filename)
-    vcm05 = data['vcm_05km']
-    vcm_lonlat = vcm05.sum(axis='altitude')
-    
-    pcolor_vcm(vcm_lonlat)
+    if title is not None:
+        plt.title(title)
 
 
 def aggregate_arrays_from_files(files, array_name, summed_along=None):
     
     aggregated = None
+
+    files.sort()
 
     for f in files:
 
@@ -48,12 +43,22 @@ def aggregate_arrays_from_files(files, array_name, summed_along=None):
     return aggregated
 
 
-def show_files(files):
+def show_file(filename, title):
+    
+    data = da.read_nc(filename)
+    vcm05 = data['vcm_05km']
+    vcm_lonlat = vcm05.sum(axis='altitude')
+    
+    pcolor_vcm(vcm_lonlat, title)
+
+
+def show_files(files, title):
     
     vcm = aggregate_arrays_from_files(files, 'vcm_05km', 'altitude')
     nprof = aggregate_arrays_from_files(files, 'nprof')
-    cf = vcm / nprof
-    pcolor_vcm(cf)
+    cloudypoints = vcm / nprof
+    cloudypoints[nprof==0] = 0
+    pcolor_vcm(cloudypoints, 'cloudy points in profiles : ' + title)
 
 
 def main(year=2009, month=1, day=1):
