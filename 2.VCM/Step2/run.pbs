@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+# qsub run.pbs -v year='2007'
+
+#PBS -N "vcm2"
+#PBS -m e
+
+export PATH=/users/noel/Code/anaconda/bin:$PATH
+export PYTHONPATH=/users/noel/pycode:$PYTHONPATH
+
+cd $PBS_O_WORKDIR
+./scan_vcm_orbits.py $year
