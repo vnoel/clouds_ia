@@ -9,7 +9,7 @@ import glob
 import os
     
 
-def process_vcm_orbits_period(start, end, where='out/'):
+def process_vcm_orbits_period(start, end, where):
 
     if not os.path.isdir(where):
         print 'Creating dir ' + where
@@ -29,7 +29,7 @@ def process_vcm_orbits_period(start, end, where='out/'):
         current += timedelta(days=1)
 
 
-def main(year=2009, month=None, day=None, where=None):
+def main(year=2009, month=None, day=None, where='out/'):
 
     if day is not None and month is not None:
         year, month, day = int(year), int(month), int(day)
@@ -44,7 +44,7 @@ def main(year=2009, month=None, day=None, where=None):
         start = datetime(year, 1, 1)
         end = datetime(year, 12, 31)
 
-    process_vcm_orbits_period(start, end, where=where)
+    process_vcm_orbits_period(start, end, where)
 
 
 def test_day_run():
