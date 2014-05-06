@@ -36,8 +36,10 @@ def grid_vcm_from_vcm_orbit(vcm_orbit, lstep=2.):
             continue
         
         this_vcm = data[field].values
-        vcm_3d = np.zeros([nlon, nlat, nalt], dtype='uint16')
-        nprof = np.zeros([nlon, nlat], dtype='uint16')
+        # we're binning profiles at 5km res
+        # uint8 = 255 profiles = 1275km, good for boxes with size > 600km
+        vcm_3d = np.zeros([nlon, nlat, nalt], dtype='uint8')
+        nprof = np.zeros([nlon, nlat], dtype='uint8')
         
         for ilon, lon in enumerate(lonbins):
             
