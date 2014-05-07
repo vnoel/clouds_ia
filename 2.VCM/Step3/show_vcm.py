@@ -35,7 +35,7 @@ def aggregate_arrays_from_files(files, array_name, summed_along=None):
         if array_name not in data:
             continue
         
-        array = data[array_name].values
+        array = data[array_name] * 1.
 
         if summed_along is not None:
             array = array.sum(axis=summed_along)
@@ -46,8 +46,6 @@ def aggregate_arrays_from_files(files, array_name, summed_along=None):
             oldsum = aggregated.sum()
             aggregated += array
             
-        print array.sum(), oldsum, aggregated.sum()
-
     return aggregated
 
 
@@ -62,12 +60,12 @@ def show_file(filename, title):
 
 def show_files(files, title):
     
-    #vcm = aggregate_arrays_from_files(files, 'vcm_05km', 'altitude')
+    vcm = aggregate_arrays_from_files(files, 'vcm_05km', 'altitude')
     nprof = aggregate_arrays_from_files(files, 'nprof')
-    #cloudypoints = vcm / nprof
-    #cloudypoints[nprof==0] = 0
-    #pcolor_vcm(nprof, 'cloudy points in profiles : ' + title)
-    #plt.clim(0,50)
+    cloudypoints = vcm / nprof
+    cloudypoints[nprof==0] = 0
+    pcolor_vcm(cloudypoints, 'cloudy points in profiles : ' + title)
+    plt.clim(0,50)
 
 
 def main(year=2007, month=3, day=1):
@@ -80,9 +78,6 @@ def main(year=2007, month=3, day=1):
     
     mask = 'out/%04d%02d/vcm_lat_%04d-%02d-*.nc4' % (year, month, year, month)
     grid_files = glob.glob(mask)
-    grid_files.sort()
-    
-    #show_file(grid_files[0], 'file = ' + grid_files[0])
     show_files(grid_files, 'month = %04d-%02d' % (year, month))
     
     mask = ['out/%04d%02d/vcm_lat_%04d-%02d*.nc4' % (year, m, year, m) for m in [1,2,3]]
