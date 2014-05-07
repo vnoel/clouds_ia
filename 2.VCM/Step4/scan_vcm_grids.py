@@ -24,18 +24,17 @@ def aggregate_arrays_from_files(files):
             fields = data.keys()
         
         for field in fields:
+            if field not in data:
+                continue
             if field not in out:
-                out[field] = data[field]
+                out[field] = data[field] * 1.
             else:
                 out[field] += data[field]
-        print data['vcm_05km'].sum()
-
-    print out['vcm_05km'].sum(), data['vcm_05km'].sum() * len(files)
 
     return out
 
 
-def process_vcm_grids_period(start, end, where):
+def process_vcm_grids_period(start, end, cycle, where):
 
     if not os.path.isdir(where):
         print 'Creating dir ' + where
@@ -44,24 +43,24 @@ def process_vcm_grids_period(start, end, where):
     current = start
     while current <= end:
         
-        inpath = './in/%04d%02d/' % (current.year, current.month)
-        mask = 'vcm_lat_%04d-%02d-%02d*.nc4' % (current.year, current.month, current.day)
-        vcm_files = glob.glob(inpath + mask)
-        outpath = where + '%04d%02d/' % (current.year, current.month)
+        cycle_start = current
+        cycle_files = []
         
-        if not os.path.isdir(outpath):
-            print 'Creating ' + outpath
-            os.mkdir(outpath)
+        for i in range(cycle):
             
-        outfile = 'vcm_lat_%04d-%02d-%02d.nc4' % (current.year, current.month, current.day)
-        print inpath, mask, current, len(vcm_files)
-        aggregated = aggregate_arrays_from_files(vcm_files)
-        aggregated.write_nc(outpath + outfile, mode='w')
+            inpath = './in/%04d%02d/' % (current.year, current.month)
+            dayfile = 'vcm_lat_%04d-%02d-%02d.nc4' % (current.year, current.month, current.day)
+            cycle_files.append(inpath + dayfile)
+            
+            current += timedelta(days=1)
+            
+        aggregated = aggregate_arrays_from_files(cycle_files)
         
-        current += timedelta(days=1)
+        outfile = where + 'vcm_lat_%04d-%02d-%02d_%ddays.nc4' % (cycle_start.year, cycle_start.month, cycle_start.day, cycle)
+        aggregated.write_nc(outfile, mode='w')
 
 
-def main(year=2009, month=None, day=None, where='out/'):
+def main(year=2007, month=None, day=None, cycle=15, where='out/'):
 
     if day is not None and month is not None:
         year, month, day = int(year), int(month), int(day)
@@ -76,7 +75,7 @@ def main(year=2009, month=None, day=None, where='out/'):
         start = datetime(year, 1, 1)
         end = datetime(year, 12, 31)
 
-    process_vcm_grids_period(start, end, where)
+    process_vcm_grids_period(start, end, cycle, where)
 
 
 def test_day_run():
