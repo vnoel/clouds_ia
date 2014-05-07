@@ -65,7 +65,7 @@ def show_files(files, title):
     cloudypoints = vcm / nprof
     cloudypoints[nprof==0] = 0
     pcolor_vcm(cloudypoints, 'cloudy points in profiles : ' + title)
-    plt.clim(0,50)
+    plt.clim(0,20)
 
 
 def main(year=2007, month=3, day=1):
