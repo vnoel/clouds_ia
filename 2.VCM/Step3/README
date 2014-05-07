@@ -1,0 +1,3 @@
+Cette etape est pour agreger les resultats de cloud mask gride de l'etape precedente avec un pas de temps variable, par exemple toutes les detections sur 15 jours.
+
+A priori le plus efficace est d'agreger sur des durees journalieres pour commencer - on ne va jamais descendre plus bas en pas de temps, mais le meilleur pas de temps plus long est dur a evaluer a priori.
