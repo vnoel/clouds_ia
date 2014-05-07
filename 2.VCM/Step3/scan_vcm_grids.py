@@ -4,12 +4,38 @@
 # Created by VNoel on 2014-04-28
 
 from datetime import datetime, timedelta
-from grid_vcm import grid_vcm_file_from_vcm_orbit
+import dimarray as da
 import glob
 import os
     
 
-def process_vcm_orbits_period(start, end, where):
+def aggregate_arrays_from_files(files):
+    
+    files.sort()
+    fields = None
+    
+    out = da.Dataset()
+
+    for f in files:
+        
+        data = da.read_nc(f)
+
+        if fields is None:
+            fields = data.keys()
+        
+        for field in fields:
+            if field not in out:
+                out[field] = data[field]
+            else:
+                out[field] += data[field]
+        print data['vcm_05km'].sum()
+
+    print out['vcm_05km'].sum(), data['vcm_05km'].sum() * len(files)
+
+    return out
+
+
+def process_vcm_grids_period(start, end, where):
 
     if not os.path.isdir(where):
         print 'Creating dir ' + where
@@ -19,12 +45,18 @@ def process_vcm_orbits_period(start, end, where):
     while current <= end:
         
         inpath = './in/%04d%02d/' % (current.year, current.month)
-        mask = 'vcm_%04d-%02d-%02d*.nc4' % (current.year, current.month, current.day)
+        mask = 'vcm_lat_%04d-%02d-%02d*.nc4' % (current.year, current.month, current.day)
         vcm_files = glob.glob(inpath + mask)
         outpath = where + '%04d%02d/' % (current.year, current.month)
+        
+        if not os.path.isdir(outpath):
+            print 'Creating ' + outpath
+            os.mkdir(outpath)
+            
+        outfile = 'vcm_lat_%04d-%02d-%02d.nc4' % (current.year, current.month, current.day)
         print inpath, mask, current, len(vcm_files)
-        for vcm_file in vcm_files:
-            grid_vcm_file_from_vcm_orbit(vcm_file, where=outpath)
+        aggregated = aggregate_arrays_from_files(vcm_files)
+        aggregated.write_nc(outpath + outfile, mode='w')
         
         current += timedelta(days=1)
 
@@ -44,16 +76,16 @@ def main(year=2009, month=None, day=None, where='out/'):
         start = datetime(year, 1, 1)
         end = datetime(year, 12, 31)
 
-    process_vcm_orbits_period(start, end, where)
+    process_vcm_grids_period(start, end, where)
 
 
 def test_day_run():
     
-    orbit_files = glob.glob('in/200901/vcm_2009-01-01*.nc4')
+    grid_files = glob.glob('in/200901/vcm_2009-01-01*.nc4')
     main(2009,1,1,where='out.test/')
-    grid_files = glob.glob('out.test/200901/vcm_lat_*.nc4')
+    day_files = glob.glob('out.test/200901/vcm_lat_*.nc4')
         
-    assert len(orbit_files)==len(grid_files)
+    assert False
     
     
 if __name__=='__main__':
