@@ -14,6 +14,9 @@ def aggregate_arrays_from_files(files):
     files.sort()
     fields = None
     
+    if len(files) == 0:
+        return None
+    
     out = da.Dataset()
 
     for f in files:
@@ -56,7 +59,8 @@ def process_vcm_grids_period(start, end, where):
         outfile = 'vcm_lat_%04d-%02d-%02d.nc4' % (current.year, current.month, current.day)
         print inpath, mask, current, len(vcm_files)
         aggregated = aggregate_arrays_from_files(vcm_files)
-        aggregated.write_nc(outpath + outfile, mode='w')
+        if aggregated is not None:
+            aggregated.write_nc(outpath + outfile, mode='w')
         
         current += timedelta(days=1)
 
