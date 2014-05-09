@@ -22,11 +22,13 @@ def vcm_from_layers(nl, base, top, havg, ltype, only_havg=None):
     
     # clean up unwanted layers first
     
+    basecopy = base.copy()
+    
     # for clouds, feature type == layer_type == 2
-    base[ltype != 2] = -9999.
+    basecopy[ltype != 2] = -9999.
     # keep only requested havg
     if only_havg is not None:
-        base[havg != only_havg] = -9999.
+        basecopy[havg != only_havg] = -9999.
     
     for i in xrange(nprof):
         
@@ -35,11 +37,13 @@ def vcm_from_layers(nl, base, top, havg, ltype, only_havg=None):
         
         for j in xrange(nl[i]):
             
-            if base[i,j] < 0:
+            if basecopy[i,j] < 0:
                 continue
 
-            idx = (vcm_alt >= base[i,j]) & (vcm_alt < top[i,j])
+            idx = (vcm_alt >= basecopy[i,j]) & (vcm_alt < top[i,j])
             vcm[i, idx] = 1
+    
+    del basecopy
     
     return vcm
     
