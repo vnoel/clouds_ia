@@ -56,7 +56,7 @@ def process_vcm_grids_period(start, end, cycle, where):
             
         aggregated = aggregate_arrays_from_files(cycle_files)
         
-        outfile = where + 'vcm_lat_%04d-%02d-%02d_%ddays.nc4' % (cycle_start.year, cycle_start.month, cycle_start.day, cycle)
+        outfile = where + 'vcm_grid_%04d-%02d-%02d_%ddays.nc4' % (cycle_start.year, cycle_start.month, cycle_start.day, cycle)
         aggregated.write_nc(outfile, mode='w')
 
 
