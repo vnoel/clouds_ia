@@ -8,7 +8,7 @@ import calipso_l2
 import dimarray as da
 
 # altitude vector
-vcm_alt = np.r_[0:22.3:0.3]
+vcm_alt = np.r_[0:19.5+0.03:0.03]
 nalt = vcm_alt.shape[0]
 
 # averaging levels to include
