@@ -31,9 +31,9 @@ class GeoProf(object):
         return lon, lat
     
     def altitude(self):
-        ''' altitude in meters '''
+        ''' altitude in kilometers '''
         
-        alt = self._read_var('Height')
+        alt = self._read_var('Height') / 1e3
         return alt
     
     def cloudmask(self):
@@ -64,6 +64,9 @@ def test_geoprof():
     assert lat.shape == (3728,)
     
     alt = geo.altitude()
+    assert alt.max() < 40.
+    assert alt.min() > -10.
+    
     cm = geo.cloudmask()
     assert alt.shape == (3728, 125)
     assert cm.shape == (3728, 125)
