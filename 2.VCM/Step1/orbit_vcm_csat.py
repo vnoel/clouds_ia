@@ -9,9 +9,12 @@ from geoprof import GeoProf
 from scipy.interpolate import interp1d
 
 
-def _find_geoprof_file(year, month, day, cal_l2_file):
+def _find_geoprof_file(cal_l2_file):
     
     orbit_id = cal_l2_file[-25:-4]
+    year = int(cal_l2_file[-25:-21])
+    month = int(cal_l2_file[-20:-18])
+    day = int(cal_l2_file[-17:-15])
     
     path = '/bdd/CFMIP/OBS_LOCAL/ATRAIN_COLOC/CLOUDSAT_COLOC/GEOPROF-LIDAR/%04d/' % year
     folder = '%04d_%02d_%02d/' % (year, month, day)
@@ -22,7 +25,6 @@ def _find_geoprof_file(year, month, day, cal_l2_file):
         return geofile
     else:
         return None
-    
     
     
 def _geoprof_vcm_on_altitudes(geo_vcm, geo_alt, altitudes):
@@ -47,9 +49,9 @@ def _geoprof_vcm_from_geoprof_file(geoprof_file):
     return geovcm, geoalt
     
 
-def vcm_from_cal_orbit(year, month, day, cal_l2_file, vcm_alt):
+def vcm_from_cal_orbit(cal_l2_file, vcm_alt):
     
-    geoprof_file = _find_geoprof_file(year, month, day, cal_l2_file)
+    geoprof_file = _find_geoprof_file(cal_l2_file)
     geoprof_vcm, geoprof_alt = _geoprof_vcm_from_geoprof_file(geoprof_file)
     vcm = _geoprof_vcm_on_altitudes(geoprof_vcm, geoprof_alt, vcm_alt)
     return vcm
@@ -58,7 +60,7 @@ def vcm_from_cal_orbit(year, month, day, cal_l2_file, vcm_alt):
     
 def test_find_geoprof_file():
     
-    geofile = _find_geoprof_file(2007,1,1,'CAL_LID_L2_05kmCLay-Prov-V3-01.2007-01-01T00-22-49ZN.hdf')
+    geofile = _find_geoprof_file('CAL_LID_L2_05kmCLay-Prov-V3-01.2007-01-01T00-22-49ZN.hdf')
     assert geofile == '/bdd/CFMIP/OBS_LOCAL/ATRAIN_COLOC/CLOUDSAT_COLOC/GEOPROF-LIDAR/2007/2007_01_01/CALTRACK-5km_CS-2B-GEOPROF_V1-00_2007-01-01T00-22-49ZN.hdf'
     
 
