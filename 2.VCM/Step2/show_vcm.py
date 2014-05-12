@@ -46,7 +46,7 @@ def aggregate_arrays_from_files(files, array_name, summed_along=None):
 def show_file(filename, title):
     
     data = da.read_nc(filename)
-    vcm05 = data['vcm_05km']
+    vcm05 = data['vcm_cal05']
     vcm_lonlat = vcm05.sum(axis='altitude')
     
     pcolor_vcm(vcm_lonlat, title)
@@ -54,7 +54,7 @@ def show_file(filename, title):
 
 def show_files(files, title):
     
-    vcm = aggregate_arrays_from_files(files, 'vcm_05km', 'altitude')
+    vcm = aggregate_arrays_from_files(files, 'vcm_cal05', 'altitude')
     nprof = aggregate_arrays_from_files(files, 'nprof')
     cloudypoints = vcm / nprof
     cloudypoints[nprof==0] = 0
@@ -62,23 +62,15 @@ def show_files(files, title):
     plt.clim(0,20)
 
 
-def main(year=2007, month=1, day=1):
+def main(vcm_grid_file='./test.out/vcm_grid_2007-01-01.nc4'):
     
     import glob
     
-    year = int(year)
-    month = int(month)
-    day = int(day)
+    show_file(vcm_grid_file, vcm_grid_file)
     
-    mask = 'out/%04d%02d/vcm_lat_%04d-%02d-%02d*.nc4' % (year, month, year, month, day)
-    grid_files = glob.glob(mask)
-    
-    show_file(grid_files[0], 'orbit = ' + grid_files[0])
-    show_files(grid_files, 'date = %04d-%02d-%02d' % (year, month, day))
-    
-    mask = 'out/%04d%02d/vcm_lat_%04d-%02d*.nc4' % (year, month, year, month)
-    grid_files = glob.glob(mask)
-    show_files(grid_files, 'month = %04d-%02d' % (year, month))
+    #mask = 'out/%04d%02d/vcm_lat_%04d-%02d*.nc4' % (year, month, year, month)
+    #grid_files = glob.glob(mask)
+    #show_files(grid_files, 'month = %04d-%02d' % (year, month))
     
     plt.show()
     
