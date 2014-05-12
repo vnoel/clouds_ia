@@ -36,6 +36,7 @@ def _geoprof_vcm_on_altitudes(geo_vcm, geo_alt, altitudes):
     for i in np.arange(nprof):
         f = interp1d(geo_alt[i,::-1], geo_vcm[i,::-1], kind='nearest')
         vcm[i,:] = f(altitudes)
+        vcm[i,:] = (vcm[i,:] >= 20)
     
     return vcm
 
@@ -83,9 +84,9 @@ def test_geoprof_vcm_on_altitudes():
     
     # pour info : first cloudy profile = 8
 
-    cloudyprofs0 = (geo_vcm > 20).sum(axis=1)
+    cloudyprofs0 = (geo_vcm >= 20).sum(axis=1)
     cloudyprofs0[cloudyprofs0 > 1] = 1
-    cloudyprofs1 = (vcm > 20).sum(axis=1)
+    cloudyprofs1 = vcm.sum(axis=1)
     cloudyprofs1[cloudyprofs1 > 1] = 1
 
     assert cloudyprofs0.sum() == cloudyprofs1.sum()
