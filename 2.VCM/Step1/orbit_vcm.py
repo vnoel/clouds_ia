@@ -19,6 +19,9 @@ def vcm_dataset_from_l2_orbits(calfilename):
     # geo_vcm is a numpy array
     geo_vcm = orbit_vcm_csat.vcm_from_cal_orbit(calfilename, vcm['vcm_cal05'].labels[1])
     vcm['vcm_csat'] = da.DimArray(geo_vcm, labels=vcm['vcm_cal05'].labels, dims=vcm['vcm_cal05'].dims)
+    #vcm['vcm_csat_cal05'] = vcm['vcm_csat'] + vcm['vcm_cal05']
+    #idx = vcm['vcm_csat_cal05'] > 1
+    #vcm['vcm_csat_cal05'].ix[idx] = 1
     return vcm, outname
     
 
