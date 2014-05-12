@@ -39,6 +39,8 @@ def aggregate_arrays_from_files(files, array_name, summed_along=None):
             aggregated = array
         else:
             aggregated += array
+        
+        print aggregated.max()
 
     return aggregated
 
@@ -59,7 +61,7 @@ def show_files(files, title):
     cloudypoints = vcm / nprof
     cloudypoints[nprof==0] = 0
     pcolor_vcm(cloudypoints, 'cloudy points in profiles : ' + title)
-    plt.clim(0,20)
+    plt.clim(0,120)
 
 
 def main(vcm_grid_file='./test.out/vcm_grid_2007-01-01.nc4'):
@@ -68,9 +70,9 @@ def main(vcm_grid_file='./test.out/vcm_grid_2007-01-01.nc4'):
     
     show_file(vcm_grid_file, vcm_grid_file)
     
-    #mask = 'out/%04d%02d/vcm_lat_%04d-%02d*.nc4' % (year, month, year, month)
-    #grid_files = glob.glob(mask)
-    #show_files(grid_files, 'month = %04d-%02d' % (year, month))
+    mask = 'out/200701/vcm_grid_*.nc4'
+    grid_files = glob.glob(mask)
+    show_files(grid_files, '200701')
     
     plt.show()
     

@@ -88,7 +88,6 @@ def grid_vcm_file_from_vcm_orbits(vcm_orbits, outname, where='./out'):
         else:
             for field in fields:
                 dataset[field] += out[field]
-        print dataset['nprof'].max(), dataset['nprof'].dtype
         
     if not os.path.isdir(where):
         print 'Creating dir ' + where
