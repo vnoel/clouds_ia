@@ -54,8 +54,8 @@ def test_day_grid_for_orbits():
     orbit_files = glob.glob('in/200701/vcm_2007-01-01*.nc4')
     main(2007,1,1,where='out.test/')
     assert os.path.isfile('out.test/200701/vcm_grid_2007-01-01.nc4')
-    
-    
+        
+
 if __name__=='__main__':
     import plac
     plac.call(main)
