@@ -16,7 +16,7 @@ def _find_geoprof_file(cal_l2_file):
     month = int(cal_l2_file[-20:-18])
     day = int(cal_l2_file[-17:-15])
     
-    path = '/bdd/CFMIP/OBS_LOCAL/ATRAIN_COLOC/CLOUDSAT_COLOC/GEOPROF-LIDAR/%04d/' % year
+    path = '/bdd/CFMIP/OBS_LOCAL/ATRAIN_COLOC/CALTRACK-GEOPROF/GEOPROF-LIDAR/%04d/' % year
     folder = '%04d_%02d_%02d/' % (year, month, day)
     
     geofile = path + folder + 'CALTRACK-5km_CS-2B-GEOPROF_V1-00_' + orbit_id + '.hdf'
@@ -34,6 +34,8 @@ def _geoprof_vcm_on_altitudes(geo_vcm, geo_alt, altitudes):
 
     vcm = np.zeros([nprof, nalt], dtype='uint8')
     for i in np.arange(nprof):
+        if np.max(geo_alt[i,:] < 20):
+            continue
         f = interp1d(geo_alt[i,::-1], geo_vcm[i,::-1], kind='nearest')
         vcm[i,:] = f(altitudes)
         vcm[i,:] = (vcm[i,:] >= 20)
@@ -62,12 +64,12 @@ def vcm_from_cal_orbit(cal_l2_file, vcm_alt):
 def test_find_geoprof_file():
     
     geofile = _find_geoprof_file('CAL_LID_L2_05kmCLay-Prov-V3-01.2007-01-01T00-22-49ZN.hdf')
-    assert geofile == '/bdd/CFMIP/OBS_LOCAL/ATRAIN_COLOC/CLOUDSAT_COLOC/GEOPROF-LIDAR/2007/2007_01_01/CALTRACK-5km_CS-2B-GEOPROF_V1-00_2007-01-01T00-22-49ZN.hdf'
+    assert geofile == '/bdd/CFMIP/OBS_LOCAL/ATRAIN_COLOC/CLOUDSAT_COLOC/CALTRACK-GEOPROF/2007/2007_01_01/CALTRACK-5km_CS-2B-GEOPROF_V1-00_2007-01-01T00-22-49ZN.hdf'
     
 
 def test_geoprof_vcm_from_geoprof_file():
     
-    geofile = '/bdd/CFMIP/OBS_LOCAL/ATRAIN_COLOC/CLOUDSAT_COLOC/GEOPROF-LIDAR/2007/2007_01_01/CALTRACK-5km_CS-2B-GEOPROF_V1-00_2007-01-01T00-22-49ZN.hdf'
+    geofile = '/bdd/CFMIP/OBS_LOCAL/ATRAIN_COLOC/CLOUDSAT_COLOC/CALTRACK-GEOPROF/2007/2007_01_01/CALTRACK-5km_CS-2B-GEOPROF_V1-00_2007-01-01T00-22-49ZN.hdf'
     vcm, alt = _geoprof_vcm_from_geoprof_file(geofile)    
     assert vcm.shape == (3728, 125)
     assert alt.shape == (3728, 125)
@@ -75,7 +77,7 @@ def test_geoprof_vcm_from_geoprof_file():
     
 def test_geoprof_vcm_on_altitudes():
     
-    geofile = '/bdd/CFMIP/OBS_LOCAL/ATRAIN_COLOC/CLOUDSAT_COLOC/GEOPROF-LIDAR/2007/2007_01_01/CALTRACK-5km_CS-2B-GEOPROF_V1-00_2007-01-01T00-22-49ZN.hdf'
+    geofile = '/bdd/CFMIP/OBS_LOCAL/ATRAIN_COLOC/CLOUDSAT_COLOC/CALTRACK-GEOPROF/2007/2007_01_01/CALTRACK-5km_CS-2B-GEOPROF_V1-00_2007-01-01T00-22-49ZN.hdf'
     geo_vcm, geo_alt = _geoprof_vcm_from_geoprof_file(geofile)    
     
     altitudes = np.r_[0:19.5+0.03:0.03]

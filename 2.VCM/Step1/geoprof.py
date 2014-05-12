@@ -52,7 +52,7 @@ class GeoProf(object):
 
 def test_geoprof():
     
-    path = '/bdd/CFMIP/OBS_LOCAL/ATRAIN_COLOC/CLOUDSAT_COLOC/GEOPROF-LIDAR/2007/2007_01_01/'
+    path = '/bdd/CFMIP/OBS_LOCAL/ATRAIN_COLOC/CLOUDSAT_COLOC/CALTRACK-GEOPROF/2007/2007_01_01/'
     geofile = 'CALTRACK-5km_CS-2B-GEOPROF_V1-00_2007-01-01T02-01-45ZN.hdf'
     geo = GeoProf(path + geofile)
 
@@ -78,7 +78,7 @@ def show_example():
 
     import matplotlib.pyplot as plt
     
-    path = '/bdd/CFMIP/OBS_LOCAL/ATRAIN_COLOC/CLOUDSAT_COLOC/GEOPROF-LIDAR/2007/2007_01_01/'
+    path = '/bdd/CFMIP/OBS_LOCAL/ATRAIN_COLOC/CLOUDSAT_COLOC/CALTRACK-GEOPROF/2007/2007_01_01/'
     geofile = 'CALTRACK-5km_CS-2B-GEOPROF_V1-00_2007-01-01T02-01-45ZN.hdf'
     geo = GeoProf(path + geofile)
 
