@@ -16,7 +16,7 @@ def _find_geoprof_file(cal_l2_file):
     month = int(cal_l2_file[-20:-18])
     day = int(cal_l2_file[-17:-15])
     
-    path = '/bdd/CFMIP/OBS_LOCAL/ATRAIN_COLOC/CALTRACK-GEOPROF/GEOPROF-LIDAR/%04d/' % year
+    path = '/bdd/CFMIP/OBS_LOCAL/ATRAIN_COLOC/CALTRACK-GEOPROF/%04d/' % year
     folder = '%04d_%02d_%02d/' % (year, month, day)
     
     geofile = path + folder + 'CALTRACK-5km_CS-2B-GEOPROF_V1-00_' + orbit_id + '.hdf'
