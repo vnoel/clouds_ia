@@ -8,36 +8,50 @@ import orbit_vcm_csat
 import dimarray as da
 
 
-def vcm_dataset_from_l2_orbit(filename):
+def vcm_dataset_from_l2_orbits(calfilename):
     '''
     create a vcm dataset containing cloud masks from calipso and cloudsat data,
     based on a calipso orbit file.
     '''
     # 1st create Dataset from CALIPSO data
-    vcm, outname = orbit_vcm_cal.vcm_dataset_from_l2_orbit(filename)
+    vcm, outname = orbit_vcm_cal.vcm_dataset_from_l2_orbit(calfilename)
     # 2nd add CloudSat data to Dataset
     # geo_vcm is a numpy array
-    geo_vcm = orbit_vcm_csat.vcm_from_cal_orbit(filename, vcm['vcm_05km'].labels[1])
+    geo_vcm = orbit_vcm_csat.vcm_from_cal_orbit(calfilename, vcm['vcm_05km'].labels[1])
     vcm['vcm_csat'] = da.DimArray(geo_vcm, labels=vcm['vcm_05km'].labels, dims=vcm['vcm_05km'].dims)
     return vcm, outname
     
 
-def vcm_file_from_l2_orbit(filename, where='./'):
+def vcm_file_from_l2_orbits(calfilename, where='./'):
     '''
     saves a vcm dataset in a file containing cloud masks from calipso and cloudsat data,
     based on a calipso orbit file.
     '''
     
-    vcm, outname = vcm_dataset_from_l2_orbit(filename)
+    import os
+    
+    vcm, outname = vcm_dataset_from_l2_orbits(calfilename)
     # check if path exists, fix it if not
+    if not os.path.isdir(where):
+        print 'Creating dir ' + where
+        os.mkdir(where)
+
     vcm.write_nc(where + outname, mode='w')
     
 
 def test_vcm_dataset_from_l2_orbit():
     
-    import calipso_local
-
-    l2files = calipso_local.l2_night_files(2007,1,1)
-    vcm, outname = vcm_dataset_from_l2_orbit(l2files[0])
-    print vcm
+    calfile = '/bdd/CALIPSO/Lidar_L2/05kmCLay.v2.01/2007/2007_01_01/CAL_LID_L2_05kmCLay-Prov-V2-01.2007-01-01T00-22-49ZN.hdf'
+    vcm, outname = vcm_dataset_from_l2_orbits(calfile)
+    assert outname=='vcm_2007-01-01T00-22-49ZN.nc4'
+    assert 'vcm_csat' in vcm
     
+    
+def test_vcm_file_from_l2_orbit():
+    
+    import os
+    
+    testpath = './test.out/'
+    calfile = '/bdd/CALIPSO/Lidar_L2/05kmCLay.v2.01/2007/2007_01_01/CAL_LID_L2_05kmCLay-Prov-V2-01.2007-01-01T00-22-49ZN.hdf'
+    vcm_file_from_l2_orbits(calfile, where=testpath)
+    assert os.path.isfile(testpath + 'vcm_2007-01-01T00-22-49ZN.nc4')
