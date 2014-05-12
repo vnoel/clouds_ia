@@ -4,7 +4,7 @@
 # Created by VNoel on 2014-04-28
 
 from datetime import datetime, timedelta
-from grid_vcm import grid_vcm_file_from_vcm_orbit
+from grid_vcm import grid_vcm_file_from_vcm_orbits
 import glob
 import os
     
@@ -16,25 +16,25 @@ def process_vcm_orbits_period(start, end, where):
         os.mkdir(where)
 
     current = start
-    while current <= end:
+    while current < end:
         
         inpath = './in/%04d%02d/' % (current.year, current.month)
         mask = 'vcm_%04d-%02d-%02d*.nc4' % (current.year, current.month, current.day)
         vcm_files = glob.glob(inpath + mask)
         outpath = where + '%04d%02d/' % (current.year, current.month)
-        print inpath, mask, current, len(vcm_files)
-        for vcm_file in vcm_files:
-            grid_vcm_file_from_vcm_orbit(vcm_file, where=outpath)
+        outname = 'vcm_grid_%04d-%02d-%02d.nc4' % (current.year, current.month, current.day)
+        
+        grid_vcm_file_from_vcm_orbits(vcm_files, outname, where=outpath)
         
         current += timedelta(days=1)
 
 
-def main(year=2009, month=None, day=None, where='out/'):
+def main(year=2007, month=None, day=None, where='out/'):
 
     if day is not None and month is not None:
         year, month, day = int(year), int(month), int(day)
         start = datetime(year, month, day)
-        end = start
+        end = start + timedelta(days=1)
     elif day is None and month is not None:
         year, month = int(year), int(month)
         start = datetime(year, month, 1)
@@ -47,13 +47,13 @@ def main(year=2009, month=None, day=None, where='out/'):
     process_vcm_orbits_period(start, end, where)
 
 
-def test_day_run():
+def test_day_grid_for_orbits():
     
-    orbit_files = glob.glob('in/200901/vcm_2009-01-01*.nc4')
-    main(2009,1,1,where='out.test/')
-    grid_files = glob.glob('out.test/200901/vcm_lat_*.nc4')
-        
-    assert len(orbit_files)==len(grid_files)
+    import os
+    
+    orbit_files = glob.glob('in/200701/vcm_2007-01-01*.nc4')
+    main(2007,1,1,where='out.test/')
+    assert os.path.isfile('out.test/200701/vcm_grid_2007-01-01.nc4')
     
     
 if __name__=='__main__':

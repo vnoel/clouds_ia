@@ -9,12 +9,6 @@ import dimarray as da
 
 def grid_vcm_from_vcm_orbit(vcm_orbit, lstep=2.):
     
-    # FIXME : this is very slow apparently : 24 seconds for one vcm orbit. Not good.
-    # ~8 seconds for 1 vcm_XXkm and there's three of those.
-    # 5 seconds by moving the DimArray creation at the end
-    # 2.7 seconds by avoiding the use of a DimArray in the middle
-    # 0.5 seconds by special-casing zero cases
-    
     # create vcm_3d grid
     lonbins = np.r_[-180:180+lstep:lstep]
     latbins = np.r_[-90:90+lstep:lstep]
@@ -25,7 +19,7 @@ def grid_vcm_from_vcm_orbit(vcm_orbit, lstep=2.):
     plon = data['lon'].values
     plat = data['lat'].values
     
-    altitude = data['vcm_05km'].labels[1]
+    altitude = data['vcm_cal05'].labels[1]
     nalt = altitude.shape[0]
     
     out = da.Dataset()
@@ -37,7 +31,8 @@ def grid_vcm_from_vcm_orbit(vcm_orbit, lstep=2.):
         
         this_vcm = data[field].values
         # we're binning profiles at 5km res
-        # uint8 = 255 profiles = 1275km, good for boxes with size > 600km
+        # for one day, no chance to get more than ~50 5km profiles in a 2x2 box.
+        # no guarantees for other resolutions or periods !
         vcm_3d = np.zeros([nlon, nlat, nalt], dtype='uint8')
         nprof = np.zeros([nlon, nlat], dtype='uint8')
         
@@ -73,7 +68,28 @@ def grid_vcm_file_from_vcm_orbit(vcm_orbit, where='./out/'):
     
     dataset = grid_vcm_from_vcm_orbit(vcm_orbit)
     
-    outname = 'vcm_lat_' + vcm_orbit[-25:]
+    outname = 'vcm_grid_' + vcm_orbit[-25:]
+    if not os.path.isdir(where):
+        print 'Creating dir ' + where
+        os.mkdir(where)
+    dataset.write_nc(where + outname, mode='w')
+
+
+def grid_vcm_file_from_vcm_orbits(vcm_orbits, outname, where='./out'):
+    
+    import os
+    
+    dataset = None
+    for vcm_orbit in vcm_orbits:
+        out = grid_vcm_from_vcm_orbit(vcm_orbit)
+        if dataset is None:
+            dataset = out
+            fields = dataset.keys()
+        else:
+            for field in fields:
+                dataset[field] += out[field]
+        print dataset['nprof'].max(), dataset['nprof'].dtype
+        
     if not os.path.isdir(where):
         print 'Creating dir ' + where
         os.mkdir(where)
@@ -82,5 +98,21 @@ def grid_vcm_file_from_vcm_orbit(vcm_orbit, where='./out/'):
 
 def test_orbit():
     
-    vcm_orbit = './in/200901/vcm_2009-01-15T05-17-43ZN.nc4'
-    grid_vcm_file_from_vcm_orbit(vcm_orbit)
+    import os
+    
+    vcm_orbit = './in/200701/vcm_2007-01-01T00-22-49ZN.nc4'
+    grid_vcm_file_from_vcm_orbit(vcm_orbit, where='./test.out/')
+    
+    assert os.path.isfile('./test.out/vcm_grid_2007-01-01T00-22-49ZN.nc4')
+    
+    
+def test_orbits():
+    
+    import glob, os
+
+    vcm_orbits = glob.glob('./in/200701/vcm_2007-01-01*.nc4')
+    assert len(vcm_orbits) > 1
+
+    grid_vcm_file_from_vcm_orbits(vcm_orbits, 'vcm_grid_2007-01-01.nc4', where='./test.out/')
+    
+    assert os.path.isfile('./test.out/vcm_grid_2007-01-01.nc4')
