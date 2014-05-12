@@ -12,7 +12,7 @@ import os
 def process_l2_orbits_period(start, end, where):
     
     current = start
-    while current <= end:
+    while current < end:
         outpath = where + '/%04d%02d/' % (current.year, current.month)
         l2files = calipso_local.l2_night_files(current.year, current.month, current.day)
         for l2file in l2files:
@@ -26,7 +26,7 @@ def main(year=2007, month=None, day=None, where='./out'):
     if day is not None and month is not None:
         year, month, day = int(year), int(month), int(day)
         start = datetime(year, month, day)
-        end = start
+        end = start + timedelta(days=1)
     elif day is None and month is not None:
         year, month = int(year), int(month)
         start = datetime(year, month, 1)
