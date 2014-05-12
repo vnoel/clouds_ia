@@ -39,6 +39,8 @@ def vcm_file_from_l2_orbits(calfilename, where='./'):
     vcm.write_nc(where + outname, mode='w')
     
 
+# TESTS
+
 def test_vcm_dataset_from_l2_orbit():
     
     calfile = '/bdd/CALIPSO/Lidar_L2/05kmCLay.v2.01/2007/2007_01_01/CAL_LID_L2_05kmCLay-Prov-V2-01.2007-01-01T00-22-49ZN.hdf'
