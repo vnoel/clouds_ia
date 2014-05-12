@@ -13,7 +13,7 @@ def main(input='out/200901/vcm_2009-01-01T00-07-47ZN.nc4'):
     i = 1
     for field in vcm:
         if field.startswith('vcm'):
-            plt.subplot(4, 1, i)
+            plt.subplot(3, 2, i)
             va = vcm[field]
             plt.pcolormesh(va.labels[0], va.labels[1], va.values.T)
             plt.title(field)

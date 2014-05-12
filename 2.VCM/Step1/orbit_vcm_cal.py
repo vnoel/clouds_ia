@@ -66,7 +66,7 @@ def vcm_dataset_from_l2_orbit(filename):
     
     for havg_vcm in havgs_vcm:
         vcm = vcm_from_layers(nl, base, top, havg, ltype, only_havg=havg_vcm)
-        vcm_name = 'vcm_%02dkm' % (havg_vcm)
+        vcm_name = 'vcm_cal%02d' % (havg_vcm)
         vertical_cloud_masks[vcm_name] = da.DimArray(vcm, (time_axis, alt_axis))
     
     vertical_cloud_masks['lon'] = da.DimArray(lon, (time_axis,))
@@ -103,9 +103,9 @@ def test_vcm_nprof():
     # assert vcm['altitude'].shape[0] == vcm_alt.shape[0]
     nprof = vcm['lon'].shape[0]
     assert nprof > 0
-    assert vcm['vcm_05km'].shape[0] == nprof
-    print vcm['vcm_05km'].ix[0,:]
-    assert np.all(np.isfinite(vcm['vcm_05km'][:,:]))
+    assert vcm['vcm_cal05'].shape[0] == nprof
+    print vcm['vcm_cal05'].ix[0,:]
+    assert np.all(np.isfinite(vcm['vcm_cal05'][:,:]))
     
     
 def test_vcm_creation_for_a_day():
@@ -121,7 +121,7 @@ def test_vcm_creation_for_a_day():
     for l2file in l2files:
         vcm_file_from_l2_orbit(l2file, where=out)
     
-    outfiles = glob.glob(out + '*.nc4')
+    outfiles = glob.glob(out + '*2009-01-01*.nc4')
 
     assert len(outfiles)==len(l2files)
     
