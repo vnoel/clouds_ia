@@ -72,7 +72,7 @@ def grid_vcm_file_from_vcm_orbit(vcm_orbit, where='./out/'):
     if not os.path.isdir(where):
         print 'Creating dir ' + where
         os.mkdir(where)
-    dataset.write_nc(where + outname, mode='w')
+    dataset.write_nc(where + outname, mode='w', zlib=True, complevel=9)
 
 
 def grid_vcm_file_from_vcm_orbits(vcm_orbits, outname, where='./out'):
@@ -92,7 +92,7 @@ def grid_vcm_file_from_vcm_orbits(vcm_orbits, outname, where='./out'):
     if not os.path.isdir(where):
         print 'Creating dir ' + where
         os.mkdir(where)
-    dataset.write_nc(where + outname, mode='w')
+    dataset.write_nc(where + outname, mode='w', zlib=True, complevel=9)
 
 
 def test_orbit():
