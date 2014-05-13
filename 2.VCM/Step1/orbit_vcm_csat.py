@@ -45,7 +45,11 @@ def _geoprof_vcm_on_altitudes(geo_vcm, geo_alt, altitudes):
 
 def _geoprof_vcm_from_geoprof_file(geoprof_file):
     
-    geo = GeoProf(geoprof_file)
+    try:
+        geo = GeoProf(geoprof_file)
+    except TypeError:
+        print 'Warning, cannot open ' + geoprof_file
+        return None, None
     geovcm = geo.cloudmask()
     geoalt = geo.altitude()
     geo.close()
@@ -55,7 +59,11 @@ def _geoprof_vcm_from_geoprof_file(geoprof_file):
 def vcm_from_cal_orbit(cal_l2_file, vcm_alt):
     
     geoprof_file = _find_geoprof_file(cal_l2_file)
+    if geoprof_file is None:
+        return None
     geoprof_vcm, geoprof_alt = _geoprof_vcm_from_geoprof_file(geoprof_file)
+    if geoprof_vcm is None:
+        return None
     vcm = _geoprof_vcm_on_altitudes(geoprof_vcm, geoprof_alt, vcm_alt)
     return vcm
 
