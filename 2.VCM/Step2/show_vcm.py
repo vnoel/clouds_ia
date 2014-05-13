@@ -36,7 +36,7 @@ def aggregate_arrays_from_files(files, array_name, summed_along=None):
             array = array.sum(axis=summed_along)
             
         if aggregated is None:
-            aggregated = array
+            aggregated = 1. * array
         else:
             aggregated += array
         
