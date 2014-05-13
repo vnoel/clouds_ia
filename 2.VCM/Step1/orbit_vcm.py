@@ -18,6 +18,8 @@ def vcm_dataset_from_l2_orbits(calfilename):
     # 2nd add CloudSat data to Dataset
     # geo_vcm is a numpy array
     geo_vcm = orbit_vcm_csat.vcm_from_cal_orbit(calfilename, vcm['vcm_cal05'].labels[1])
+    if geo_vcm is None:
+        return None, None
     vcm['vcm_csat'] = da.DimArray(geo_vcm, labels=vcm['vcm_cal05'].labels, dims=vcm['vcm_cal05'].dims)
     #vcm['vcm_csat_cal05'] = vcm['vcm_csat'] + vcm['vcm_cal05']
     #idx = vcm['vcm_csat_cal05'] > 1
@@ -34,12 +36,15 @@ def vcm_file_from_l2_orbits(calfilename, where='./'):
     import os
     
     vcm, outname = vcm_dataset_from_l2_orbits(calfilename)
+    if vcm is None:
+        return
+    
     # check if path exists, fix it if not
     if not os.path.isdir(where):
         print 'Creating dir ' + where
         os.mkdir(where)
 
-    vcm.write_nc(where + outname, mode='w')
+    vcm.write_nc(where + outname, mode='w', zlib=True, complevel=9)
     
 
 # TESTS
