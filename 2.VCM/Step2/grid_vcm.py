@@ -89,6 +89,15 @@ def grid_vcm_file_from_vcm_orbits(vcm_orbits, outname, where='./out'):
             for field in fields:
                 dataset[field] += out[field]
         
+
+    dataset['vcm_csat_cal05'] = dataset['vcm_csat'] + dataset['vcm_cal05']
+    idx = dataset['vcm_csat_cal05'] > 1
+    dataset['vcm_csat_cal05'].ix[idx] = 1
+    dataset['vcm_csat_cal0520'] = dataset['vcm_csat'] + dataset['vcm_cal05'] + dataset['vcm_cal20']
+    dataset['vcm_csat_cal052080'] = dataset['vcm_csat'] + dataset['vcm_cal05'] + dataset['vcm_cal20'] + dataset['vcm_cal80']
+    
+    # FIXME : combine vcm grids
+        
     if not os.path.isdir(where):
         print 'Creating dir ' + where
         os.mkdir(where)
