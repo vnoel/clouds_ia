@@ -75,6 +75,28 @@ def grid_vcm_file_from_vcm_orbit(vcm_orbit, where='./out/'):
     dataset.write_nc(where + outname, mode='w', zlib=True, complevel=9)
 
 
+combined_rules = {'vcm_csat_cal05':['vcm_csat', 'vcm_cal05'],
+            'vcm_csat_cal0520':['vcm_csat', 'vcm_cal05', 'vcm_cal20'],
+            'vcm_csat_cal052080':['vcm_csat', 'vcm_cal05', 'vcm_cal20', 'vcm_cal80']
+            }
+
+
+def add_combined_datasets(dataset):
+
+    for combined_name in combined_rules:
+        combined = None
+        for to_combine in combined_rules[combined]:
+            if combined is None:
+                combined = dataset[to_combine]
+            else:
+                combined += dataset[to_combine]
+        idx = (combined > 1)
+        combined.ix[idx] = 1
+        dataset[combined_name] = combined
+    
+    return combined
+
+
 def grid_vcm_file_from_vcm_orbits(vcm_orbits, outname, where='./out'):
     
     import os
@@ -90,13 +112,7 @@ def grid_vcm_file_from_vcm_orbits(vcm_orbits, outname, where='./out'):
                 dataset[field] += out[field]
         
 
-    dataset['vcm_csat_cal05'] = dataset['vcm_csat'] + dataset['vcm_cal05']
-    idx = dataset['vcm_csat_cal05'] > 1
-    dataset['vcm_csat_cal05'].ix[idx] = 1
-    dataset['vcm_csat_cal0520'] = dataset['vcm_csat'] + dataset['vcm_cal05'] + dataset['vcm_cal20']
-    dataset['vcm_csat_cal052080'] = dataset['vcm_csat'] + dataset['vcm_cal05'] + dataset['vcm_cal20'] + dataset['vcm_cal80']
-    
-    # FIXME : combine vcm grids
+    dataset = add_combined_datasets(dataset)
         
     if not os.path.isdir(where):
         print 'Creating dir ' + where
