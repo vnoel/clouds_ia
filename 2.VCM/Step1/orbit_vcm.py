@@ -51,7 +51,46 @@ def _find_geoprof_file(year, month, day, orbit_id):
     else:
         return None
 
+def combine_vcms_slow(vcm, vcm5, vcms):
+    # this is nifty but very slow. It will be nicer to do things myself.
+    
+    for vcm_name in 'vcm_cal05', 'vcm_cal20', 'vcm_cal80':
+        this = vcm5[vcm_name]
+        vcm[vcm_name] = this.reindex_axis(vcm['vcm_cal333'].labels[0], method='nearest')
+    
+    vcm['vcm_csat'] = vcmc.reindex_axis(vcm['vcm_cal333'].labels[0], method='nearest')
 
+
+def combine_vcms(vcm, vcm5, vcmc, mintime5, maxtime5):
+    
+    nprof5 = mintime5.shape[0]
+    time333 = vcm.labels[0]
+    
+    # first find 333m profiles indexes for a given 5km profile
+    n1, n2 = np.zeros(nprof5), np.zeros(nprof5)
+    n = 0
+    for i in np.r_[nprof5]:
+        n1[i] = n
+        while time333[n] < maxtime5[i]:
+            n += 1
+        n2[i] = n-1
+    
+    # remap CALIPSO flag
+    for vcm_name in 'vcm_cal05', 'vcm_cal20', 'vcm_cal80':
+        this_vcm = np.zeros_like(vcm['vcm_cal333'].values)
+        for i in np.r_[nprof5]:
+            this_vcm[n1[i]:n2[i],:] = vcm5[vcm_name].ix[i,:]
+        vcm[vcm_name] = da.DimArray(this_vcm)
+    
+    # remap cloudsat flag
+    this_vcm = np.zeros_like(vcmc.values)
+    for i in np.r_[nprof5]:
+        this_vcm[n1[i]:n2[i],:] = vcmc.ix[i,:]
+    vcm['vcm_csat'] = vcmc
+    
+    return vcm
+    
+    
 
 def vcm_dataset_from_l2_orbits(cal333, cal5, csat):
     '''
@@ -73,13 +112,7 @@ def vcm_dataset_from_l2_orbits(cal333, cal5, csat):
     if vcmc is None:
         return
     
-    # this is nifty but very slow. It will be nicer to do things myself.
-    
-    for vcm_name in 'vcm_cal05', 'vcm_cal20', 'vcm_cal80':
-        this = vcm5[vcm_name]
-        vcm[vcm_name] = this.reindex_axis(vcm['vcm_cal333'].labels[0], method='nearest')
-    
-    vcm['vcm_csat'] = vcmc.reindex_axis(vcm['vcm_cal333'].labels[0], method='nearest')
+    vcm = combine_vcms(vcm, vcm5, vcms)
 
     return vcm, 'paf'
     
