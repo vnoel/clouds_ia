@@ -4,7 +4,7 @@
 # Created by VNoel Thu Apr 24 17:07:38 2014
 
 import numpy as np
-import calipso_l2
+import calipso.level2 as calipso_l2
 import dimarray as da
 
 # altitude vector
@@ -73,7 +73,7 @@ def vcm_dataset_from_l2_orbit(filename):
     vertical_cloud_masks['lat'] = da.DimArray(lat, (time_axis,))
 
     outname = 'vcm_' + l2.id + '.nc4'
-    return vertical_cloud_masks, outname
+    return vertical_cloud_masks
     
     
 def vcm_file_from_l2_orbit(filename, where='./'):
