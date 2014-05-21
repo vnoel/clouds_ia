@@ -3,7 +3,7 @@
 
 # Created by VNoel on 2014-04-24
 
-from orbit_vcm import vcm_file_from_l2_orbits
+from orbit_vcm import vcm_file_from_333_orbit
 from datetime import datetime, timedelta
 import calipso_local
 import os
@@ -14,14 +14,14 @@ def process_l2_orbits_period(start, end, where):
     current = start
     while current < end:
         outpath = where + '/%04d%02d/' % (current.year, current.month)
-        l2files = calipso_local.l2_night_files(current.year, current.month, current.day)
+        l2files = calipso_local.l2_night_files(current.year, current.month, current.day, havg=0.333)
         for l2file in l2files:
-            vcm_file_from_l2_orbits(l2file, where=outpath)
+            vcm_file_from_333_orbit(l2file, where=outpath)
         
         current += timedelta(days=1)
 
 
-def main(year=2007, month=None, day=None, where='./out'):
+def main(year=2008, month=None, day=None, where='./out'):
 
     if day is not None and month is not None:
         year, month, day = int(year), int(month), int(day)
@@ -43,8 +43,8 @@ def test_day_run():
     
     import glob
     
-    main(2007, 1, 1, where='./test.out/')
-    outfiles = glob.glob('./test.out/200701/*.nc4')
+    main(2008, 1, 1, where='./test.out/')
+    outfiles = glob.glob('./test.out/200801/*.nc4')
     assert len(outfiles) > 0
 
 

@@ -50,7 +50,7 @@ def vcm_from_layers(nl, base, top, havg, ltype, only_havg=None):
 
 def vcm_dataset_from_l2_orbit(filename):
     
-    print 'Creating vcm dataset from l2 file ' + filename
+    #print 'Creating vcm dataset from l2 file ' + filename
     
     l2 = calipso_l2.Cal2(filename)
     lon, lat = l2.coords()
