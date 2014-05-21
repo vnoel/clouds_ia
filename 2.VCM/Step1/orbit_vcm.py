@@ -10,6 +10,7 @@ import dimarray as da
 import calipso_local
 import os
 import numpy as np
+import localpaths
 
 
 def _find_orbit_id(cal_l2_file):
@@ -42,7 +43,7 @@ def _find_geoprof_file(year, month, day, orbit_id):
     find geoprof file associated with a orbit identifier
     '''
     
-    path = '/bdd/CFMIP/OBS_LOCAL/ATRAIN_COLOC/CLOUDSAT_COLOC/CALTRACK-GEOPROF/%04d/' % year
+    path = localpaths.caltrack_geoprof_dir + '%04d/' % year
     folder = '%04d_%02d_%02d/' % (year, month, day)
     
     geofile = path + folder + 'CALTRACK-5km_CS-2B-GEOPROF_V1-00_' + orbit_id + '.hdf'
