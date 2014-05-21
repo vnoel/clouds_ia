@@ -72,7 +72,7 @@ def test_vcm_nprof():
     import glob
     
     out = './test.out'
-    test333 = '/homedata/noel/Data/333mCLay/2008_01_01/CAL_LID_L2_333mCLay-ValStage1-V3-01.2008-01-01T01-30-23ZN.hdf'
+    test333 = '/homedata/noel/Data/333mCLay/2008/2008_01_01/CAL_LID_L2_333mCLay-ValStage1-V3-01.2008-01-01T01-30-23ZN.hdf'
     vcm = vcm_dataset_from_l2_orbit(test333)
     nprof = vcm['lon'].shape[0]
     assert nprof == 55920

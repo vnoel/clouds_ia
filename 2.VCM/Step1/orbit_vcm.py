@@ -9,6 +9,7 @@ import orbit_vcm_csat
 import dimarray as da
 import calipso_local
 import os
+import numpy as np
 
 
 def _find_orbit_id(cal_l2_file):
@@ -51,7 +52,7 @@ def _find_geoprof_file(year, month, day, orbit_id):
     else:
         return None
 
-def combine_vcms_slow(vcm, vcm5, vcms):
+def combine_vcms_slow(vcm, vcm5, vcmc):
     # this is nifty but very slow. It will be nicer to do things myself.
     
     for vcm_name in 'vcm_cal05', 'vcm_cal20', 'vcm_cal80':
@@ -61,15 +62,19 @@ def combine_vcms_slow(vcm, vcm5, vcms):
     vcm['vcm_csat'] = vcmc.reindex_axis(vcm['vcm_cal333'].labels[0], method='nearest')
 
 
-def combine_vcms(vcm, vcm5, vcmc, mintime5, maxtime5):
+def combine_vcms(vcm, vcm5, vcmc):
+    
+    combined = da.Dataset()
+    
+    mintime5, maxtime5 = vcm5['time_min'].values, vcm5['time_max'].values
     
     nprof5 = mintime5.shape[0]
-    time333 = vcm.labels[0]
+    time333 = vcm['vcm_cal333'].labels[0]
     
     # first find 333m profiles indexes for a given 5km profile
     n1, n2 = np.zeros(nprof5), np.zeros(nprof5)
     n = 0
-    for i in np.r_[nprof5]:
+    for i in np.r_[0:nprof5]:
         n1[i] = n
         while time333[n] < maxtime5[i]:
             n += 1
@@ -78,21 +83,21 @@ def combine_vcms(vcm, vcm5, vcmc, mintime5, maxtime5):
     # remap CALIPSO flag
     for vcm_name in 'vcm_cal05', 'vcm_cal20', 'vcm_cal80':
         this_vcm = np.zeros_like(vcm['vcm_cal333'].values)
-        for i in np.r_[nprof5]:
+        for i in np.r_[0:nprof5]:
             this_vcm[n1[i]:n2[i],:] = vcm5[vcm_name].ix[i,:]
-        vcm[vcm_name] = da.DimArray(this_vcm)
+        combined[vcm_name] = da.DimArray(this_vcm, labels=vcm['vcm_cal333'].labels, dims=vcm['vcm_cal333'].dims)
     
     # remap cloudsat flag
-    this_vcm = np.zeros_like(vcmc.values)
-    for i in np.r_[nprof5]:
+    this_vcm = np.zeros_like(vcm['vcm_cal333'].values)
+    for i in np.r_[0:nprof5]:
         this_vcm[n1[i]:n2[i],:] = vcmc.ix[i,:]
-    vcm['vcm_csat'] = vcmc
+    combined['vcm_csat'] = da.DimArray(this_vcm, labels=vcm['vcm_cal333'].labels, dims=vcm['vcm_cal333'].dims)
     
     return vcm
     
     
 
-def vcm_dataset_from_l2_orbits(cal333, cal5, csat):
+def vcm_dataset_from_l2_orbits(cal333, cal5, csat, slow=False):
     '''
     create a vcm dataset containing cloud masks from calipso 333m, calipso 5km, and cloudsat data.
     '''
@@ -112,7 +117,10 @@ def vcm_dataset_from_l2_orbits(cal333, cal5, csat):
     if vcmc is None:
         return
     
-    vcm = combine_vcms(vcm, vcm5, vcms)
+    if slow:
+        combine_vcms_slow(vcm, vcm5, vcmc)
+    else:
+        vcm = combine_vcms(vcm, vcm5, vcmc)
 
     return vcm, 'paf'
     
@@ -141,8 +149,19 @@ def vcm_file_from_l2_orbit(cal333_file, where='./'):
 
 # TESTS
 
-def test_vcm_dataset():
+def test_vcm_dataset_slow():
     
+    cal333file = '/homedata/noel/Data/333mCLay/2008/2008_01_01/CAL_LID_L2_333mCLay-ValStage1-V3-01.2008-01-01T01-30-23ZN.hdf'
+    geofile = '/bdd/CFMIP/OBS_LOCAL/ATRAIN_COLOC/CLOUDSAT_COLOC/CALTRACK-GEOPROF/2008/2008_01_01/CALTRACK-5km_CS-2B-GEOPROF_V1-00_2008-01-01T01-30-23ZN.hdf'
+    cal5_file = '/bdd/CALIPSO/Lidar_L2/05kmCLay.v3.01/2008/2008_01_01/CAL_LID_L2_05kmCLay-Prov-V3-01.2008-01-01T01-30-23ZN.hdf'
+    
+    vcm = vcm_dataset_from_l2_orbits(cal333file, cal5_file, geofile, slow=True)
+    
+    print vcm
+
+    
+def test_vcm_dataset():
+
     cal333file = '/homedata/noel/Data/333mCLay/2008/2008_01_01/CAL_LID_L2_333mCLay-ValStage1-V3-01.2008-01-01T01-30-23ZN.hdf'
     geofile = '/bdd/CFMIP/OBS_LOCAL/ATRAIN_COLOC/CLOUDSAT_COLOC/CALTRACK-GEOPROF/2008/2008_01_01/CALTRACK-5km_CS-2B-GEOPROF_V1-00_2008-01-01T01-30-23ZN.hdf'
     cal5_file = '/bdd/CALIPSO/Lidar_L2/05kmCLay.v3.01/2008/2008_01_01/CAL_LID_L2_05kmCLay-Prov-V3-01.2008-01-01T01-30-23ZN.hdf'
@@ -150,8 +169,6 @@ def test_vcm_dataset():
     vcm = vcm_dataset_from_l2_orbits(cal333file, cal5_file, geofile)
     
     print vcm
-    assert False
-    
 
 
 def test_orbit_id():

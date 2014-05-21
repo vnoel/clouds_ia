@@ -16,11 +16,11 @@ def _geoprof_vcm_on_altitudes(geo_vcm, geo_alt, altitudes):
 
     vcm = np.zeros([nprof, nalt], dtype='uint8')
     for i in np.arange(nprof):
-        if np.max(geo_alt[i,:] < 20):
+        if np.max(geo_alt[i,:]) < 20:
             continue
         f = interp1d(geo_alt[i,::-1], geo_vcm[i,::-1], kind='nearest')
         vcm[i,:] = f(altitudes)
-        vcm[i,:] = (vcm[i,:] >= 20)
+    vcm = (vcm >= 20)
     
     return vcm
 
@@ -66,15 +66,16 @@ def vcm_from_cal_orbit(cal_l2_file, vcm_alt):
 def test_geoprof_vcm_from_geoprof_file():
     
     geofile = '/bdd/CFMIP/OBS_LOCAL/ATRAIN_COLOC/CLOUDSAT_COLOC/CALTRACK-GEOPROF/2007/2007_01_01/CALTRACK-5km_CS-2B-GEOPROF_V1-00_2007-01-01T00-22-49ZN.hdf'
-    vcm, alt = _geoprof_vcm_from_geoprof_file(geofile)    
+    vcm, alt, time = _geoprof_vcm_from_geoprof_file(geofile)    
     assert vcm.shape == (3728, 125)
     assert alt.shape == (3728, 125)
+    assert time.shape == (3728,)
     
     
 def test_geoprof_vcm_on_altitudes():
     
     geofile = '/bdd/CFMIP/OBS_LOCAL/ATRAIN_COLOC/CLOUDSAT_COLOC/CALTRACK-GEOPROF/2007/2007_01_01/CALTRACK-5km_CS-2B-GEOPROF_V1-00_2007-01-01T00-22-49ZN.hdf'
-    geo_vcm, geo_alt = _geoprof_vcm_from_geoprof_file(geofile)    
+    geo_vcm, geo_alt, geo_time = _geoprof_vcm_from_geoprof_file(geofile)    
     
     altitudes = np.r_[0:19.5+0.03:0.03]
     vcm = _geoprof_vcm_on_altitudes(geo_vcm, geo_alt, altitudes)
@@ -84,7 +85,7 @@ def test_geoprof_vcm_on_altitudes():
 
     cloudyprofs0 = (geo_vcm >= 20).sum(axis=1)
     cloudyprofs0[cloudyprofs0 > 1] = 1
-    cloudyprofs1 = vcm.sum(axis=1)
+    cloudyprofs1 = (vcm > 0).sum(axis=1)
     cloudyprofs1[cloudyprofs1 > 1] = 1
 
     assert cloudyprofs0.sum() == cloudyprofs1.sum()

@@ -58,6 +58,7 @@ def vcm_dataset_from_l2_orbit(filename):
     nl, base, top = l2.layers()
     havg = l2.horizontal_averaging()
     ltype = l2.layer_type()
+    tai_time_min, tai_time_max = l2.time_bounds()
     
     vertical_cloud_masks = da.Dataset()
     
@@ -71,8 +72,9 @@ def vcm_dataset_from_l2_orbit(filename):
     
     vertical_cloud_masks['lon'] = da.DimArray(lon, (time_axis,))
     vertical_cloud_masks['lat'] = da.DimArray(lat, (time_axis,))
+    vertical_cloud_masks['time_min'] = da.DimArray(tai_time_min, (time_axis,))
+    vertical_cloud_masks['time_max'] = da.DimArray(tai_time_max, (time_axis,))
 
-    outname = 'vcm_' + l2.id + '.nc4'
     return vertical_cloud_masks
     
     
@@ -80,12 +82,13 @@ def vcm_file_from_l2_orbit(filename, where='./'):
     
     import os
     
-    vcm, outname = vcm_dataset_from_l2_orbit(filename)
+    vcm = vcm_dataset_from_l2_orbit(filename)
+    
     # check if where exists, fix it if not
     if not os.path.isdir(where):
         print 'Creating dir ' + where
         os.mkdir(where)
-    vcm.write_nc(where + outname, mode='w')
+    vcm.write_nc(where + 'vcm_cal5_test_' + os.path.basename(filename[:-4]) + '.nc4', mode='w')
     
     
 # test functions
@@ -99,8 +102,7 @@ def test_vcm_nprof():
     out = './test.out'
     
     l2files = calipso_local.l2_night_files(2009,1,1)
-    vcm, outname = vcm_dataset_from_l2_orbit(l2files[0])
-    # assert vcm['altitude'].shape[0] == vcm_alt.shape[0]
+    vcm = vcm_dataset_from_l2_orbit(l2files[0])
     nprof = vcm['lon'].shape[0]
     assert nprof > 0
     assert vcm['vcm_cal05'].shape[0] == nprof
@@ -115,13 +117,13 @@ def test_vcm_creation_for_a_day():
     
     out = './test.out/'
     
-    l2files = calipso_local.l2_night_files(2009,1,1)
+    l2files = calipso_local.l2_night_files(2008,1,1)
     assert l2files != []
     
     for l2file in l2files:
         vcm_file_from_l2_orbit(l2file, where=out)
     
-    outfiles = glob.glob(out + '*2009-01-01*.nc4')
+    outfiles = glob.glob(out + 'vcm_cal5_test*.nc4')
 
     assert len(outfiles)==len(l2files)
     
