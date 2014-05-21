@@ -3,8 +3,8 @@
 
 # Created by VNoel Sat May 10 14:48:13 2014
 
-import orbit_vcm_333
-import orbit_vcm_cal 
+import orbit_vcm_cal333
+import orbit_vcm_cal5 
 import orbit_vcm_csat
 import dimarray as da
 import calipso_local
@@ -60,6 +60,8 @@ def combine_vcms_slow(vcm, vcm5, vcmc):
         vcm[vcm_name] = this.reindex_axis(vcm['vcm_cal333'].labels[0], method='nearest')
     
     vcm['vcm_csat'] = vcmc.reindex_axis(vcm['vcm_cal333'].labels[0], method='nearest')
+    
+    return vcm
 
 
 def combine_vcms(vcm, vcm5, vcmc):
@@ -81,11 +83,13 @@ def combine_vcms(vcm, vcm5, vcmc):
         n2[i] = n-1
     
     # remap CALIPSO flag
-    for vcm_name in 'vcm_cal05', 'vcm_cal20', 'vcm_cal80':
+    for vcm_name in 'vcm_cal05',:
         this_vcm = np.zeros_like(vcm['vcm_cal333'].values)
         for i in np.r_[0:nprof5]:
             this_vcm[n1[i]:n2[i],:] = vcm5[vcm_name].ix[i,:]
         combined[vcm_name] = da.DimArray(this_vcm, labels=vcm['vcm_cal333'].labels, dims=vcm['vcm_cal333'].dims)
+    
+    print 'remapped calipso 5'
     
     # remap cloudsat flag
     this_vcm = np.zeros_like(vcm['vcm_cal333'].values)
@@ -93,7 +97,9 @@ def combine_vcms(vcm, vcm5, vcmc):
         this_vcm[n1[i]:n2[i],:] = vcmc.ix[i,:]
     combined['vcm_csat'] = da.DimArray(this_vcm, labels=vcm['vcm_cal333'].labels, dims=vcm['vcm_cal333'].dims)
     
-    return vcm
+    print 'remapped cloudsat'
+    
+    return combined
     
     
 
@@ -103,12 +109,12 @@ def vcm_dataset_from_l2_orbits(cal333, cal5, csat, slow=False):
     '''
     
     print cal333
-    vcm = orbit_vcm_333.vcm_dataset_from_l2_orbit(cal333)
+    vcm = orbit_vcm_cal333.vcm_dataset_from_l2_orbit(cal333)
     if vcm is None:
         return
     
     print cal5
-    vcm5 = orbit_vcm_cal.vcm_dataset_from_l2_orbit(cal5)
+    vcm5 = orbit_vcm_cal5.vcm_dataset_from_l2_orbit(cal5)
     if vcm5 is None:
         return
     
@@ -118,11 +124,11 @@ def vcm_dataset_from_l2_orbits(cal333, cal5, csat, slow=False):
         return
     
     if slow:
-        combine_vcms_slow(vcm, vcm5, vcmc)
+        vcm = combine_vcms_slow(vcm, vcm5, vcmc)
     else:
         vcm = combine_vcms(vcm, vcm5, vcmc)
 
-    return vcm, 'paf'
+    return vcm
     
 
 def vcm_file_from_l2_orbit(cal333_file, where='./'):
