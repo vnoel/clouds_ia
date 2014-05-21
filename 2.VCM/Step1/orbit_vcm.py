@@ -64,9 +64,19 @@ def combine_vcms_slow(vcm, vcm5, vcmc):
     return vcm
 
 
-def combine_vcms(vcm, vcm5, vcmc):
+def remap_profiles(values, n1, n2, nprof333):
+    '''
+    remap values on 333m profile indices
+    '''
     
-    combined = da.Dataset()
+    out = np.zeros([nprof333, values.shape[1]])
+    for i in np.r_[0:values.shape[0]]:
+        out[n1[i]:n2[i],:] = values[i,:]
+    return out
+    
+
+
+def combine_vcms(vcm, vcm5, vcmc):
     
     mintime5, maxtime5 = vcm5['time_min'].values, vcm5['time_max'].values
     
@@ -81,23 +91,25 @@ def combine_vcms(vcm, vcm5, vcmc):
         while time333[n] < maxtime5[i]:
             n += 1
         n2[i] = n-1
+
+
+    reindexed = da.Dataset()
+    reindexed['vcm_cal333'] = vcm['vcm_cal333']    
     
     # remap CALIPSO flag
-    for vcm_name in 'vcm_cal05',:
-        this_vcm = np.zeros_like(vcm['vcm_cal333'].values)
-        for i in np.r_[0:nprof5]:
-            this_vcm[n1[i]:n2[i],:] = vcm5[vcm_name].ix[i,:]
-        combined[vcm_name] = da.DimArray(this_vcm, labels=vcm['vcm_cal333'].labels, dims=vcm['vcm_cal333'].dims)
+    for vcm_name in 'vcm_cal05','vcm_cal20', 'vcm_cal80':
+        this_vcm = remap_profiles(vcm5[vcm_name].values, n1, n2, time333.shape[0])
+        reindexed[vcm_name] = da.DimArray(this_vcm, labels=vcm['vcm_cal333'].labels, dims=vcm['vcm_cal333'].dims)
     
-    print 'remapped calipso 5'
+    #remap cloudsat flag
+    this_vcm = remap_profiles(vcmc.values, n1, n2, time333.shape[0])
+    reindexed['vcm_csat'] = da.DimArray(this_vcm, labels=vcm['vcm_cal333'].labels, dims=vcm['vcm_cal333'].dims)
     
-    # remap cloudsat flag
-    this_vcm = np.zeros_like(vcm['vcm_cal333'].values)
-    for i in np.r_[0:nprof5]:
-        this_vcm[n1[i]:n2[i],:] = vcmc.ix[i,:]
-    combined['vcm_csat'] = da.DimArray(this_vcm, labels=vcm['vcm_cal333'].labels, dims=vcm['vcm_cal333'].dims)
-    
-    print 'remapped cloudsat'
+    # combine these flags
+    combined = da.Dataset()
+    all_together_now = reindexed['vcm_csat'] + reindexed['vcm_cal333'] + reindexed['vcm_cal05'] + reindexed['vcm_cal20'] + reindexed['vcm_cal80']
+    idx = (all_together_now > 0)
+    combined['vcm_csat+cal'] = da.DimArray(idx)
     
     return combined
     
@@ -163,7 +175,7 @@ def test_vcm_dataset_slow():
     
     vcm = vcm_dataset_from_l2_orbits(cal333file, cal5_file, geofile, slow=True)
     
-    print vcm
+    return vcm
 
     
 def test_vcm_dataset():
@@ -174,7 +186,7 @@ def test_vcm_dataset():
     
     vcm = vcm_dataset_from_l2_orbits(cal333file, cal5_file, geofile)
     
-    print vcm
+    return vcm
 
 
 def test_orbit_id():
