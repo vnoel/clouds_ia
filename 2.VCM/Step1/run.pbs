@@ -4,8 +4,8 @@
 #PBS -N "vcm1"
 #PBS -m e
 
-export PATH=/users/noel/Code/anaconda/bin:$PATH
+export PATH=/users/noel/Code/epd-7.2.2/bin:$PATH
 export PYTHONPATH=/users/noel/pycode:$PYTHONPATH
 
 cd $PBS_O_WORKDIR
-./scan_l2_orbits.py $year
+./scan_orbits.py 2007 1
