@@ -43,7 +43,7 @@ def _find_geoprof_file(year, month, day, orbit_id):
     find geoprof file associated with a orbit identifier
     '''
     
-    path = localpaths.caltrack_geoprof_dir + '%04d/' % year
+    path = localpaths.caltrack_geoprof_dir[0] + '%04d/' % year
     folder = '%04d_%02d_%02d/' % (year, month, day)
     
     geofile = path + folder + 'CALTRACK-5km_CS-2B-GEOPROF_V1-00_' + orbit_id + '.hdf'
