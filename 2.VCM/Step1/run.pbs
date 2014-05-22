@@ -1,11 +1,12 @@
 #!/usr/bin/env sh
-# qsub run.pbs -v year='2007'
+# qsub run.pbs -v year='2007' month='3'
 
-#PBS -N "vcm1"
+#PBS -N vcm1
 #PBS -m e
+#PBS -l walltime=1:00:00
 
-export PATH=/users/noel/Code/epd-7.2.2/bin:$PATH
-export PYTHONPATH=/users/noel/pycode:$PYTHONPATH
+export PATH=/home/noel/miniconda/bin:$PATH
+export PYTHONPATH=/home/noel/pycode
 
 cd $PBS_O_WORKDIR
-./scan_orbits.py 2007 1
+./scan_orbits.py $year $month
