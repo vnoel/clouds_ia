@@ -185,10 +185,12 @@ def _test_files():
     from localpaths import hostname, icare_id, climserv_id
 
     if hostname.endswith(icare_id):
+        print 'icare'
         cal333file = '/DATA/LIENS/CALIOP/333mCLay/2008/2008_01_01/CAL_LID_L2_333mCLay-ValStage1-V3-01.2008-01-01T01-30-23ZN.hdf'
         geofile = '/DATA/LIENS/CALIOP/CALTRACK-5km_CS-2B-GEOPROF//2008/2008_01_01/CALTRACK-5km_CS-2B-GEOPROF_V1-00_2008-01-01T01-30-23ZN.hdf'
         cal5_file = '/DATA/LIENS/CALIOP/05kmCLay/2008/2008_01_01/CAL_LID_L2_05kmCLay-Prov-V3-01.2008-01-01T01-30-23ZN.hdf'
     elif hostname.endswith(climserv_id):
+        print 'climserv'
         cal333file = '/homedata/noel/Data/333mCLay/2008/2008_01_01/CAL_LID_L2_333mCLay-ValStage1-V3-01.2008-01-01T01-30-23ZN.hdf'
         geofile = '/bdd/CFMIP/OBS_LOCAL/ATRAIN_COLOC/CLOUDSAT_COLOC/CALTRACK-GEOPROF/2008/2008_01_01/CALTRACK-5km_CS-2B-GEOPROF_V1-00_2008-01-01T01-30-23ZN.hdf'
         cal5_file = '/bdd/CALIPSO/Lidar_L2/05kmCLay.v3.01/2008/2008_01_01/CAL_LID_L2_05kmCLay-Prov-V3-01.2008-01-01T01-30-23ZN.hdf'
@@ -224,10 +226,12 @@ def test_orbit_id():
 
 def test_find_geoprof_file():
     
+    from localpaths import caltrack_geoprof_dir
+    
     cal333file = 'CAL_LID_L2_333mCLay-ValStage1-V3-01.2008-01-01T01-30-23ZN.hdf'
     y, m, d, orbit_id = _find_orbit_id(cal333file)
     geofile = _find_geoprof_file(y, m, d, orbit_id)
-    assert geofile == '/bdd/CFMIP/OBS_LOCAL/ATRAIN_COLOC/CLOUDSAT_COLOC/CALTRACK-GEOPROF/2008/2008_01_01/CALTRACK-5km_CS-2B-GEOPROF_V1-00_2008-01-01T01-30-23ZN.hdf'
+    assert geofile == caltrack_geoprof_dir + '2008/2008_01_01/CALTRACK-5km_CS-2B-GEOPROF_V1-00_2008-01-01T01-30-23ZN.hdf'
 
 
 def test_find_cal5_file():
@@ -235,7 +239,7 @@ def test_find_cal5_file():
     cal333file = 'CAL_LID_L2_333mCLay-ValStage1-V3-01.2008-01-01T01-30-23ZN.hdf'
     y, m, d, orbit_id = _find_orbit_id(cal333file)
     cal5_file = _find_cal5_file(y, m, d, orbit_id)
-    assert cal5_file == '/bdd/CALIPSO/Lidar_L2/05kmCLay.v3.01/2008/2008_01_01/CAL_LID_L2_05kmCLay-Prov-V3-01.2008-01-01T01-30-23ZN.hdf'
+    assert cal5_file == l2dir + '/2008/2008_01_01/CAL_LID_L2_05kmCLay-Prov-V3-01.2008-01-01T01-30-23ZN.hdf'
     
     
 def test_vcm_file_from_333_orbit():
