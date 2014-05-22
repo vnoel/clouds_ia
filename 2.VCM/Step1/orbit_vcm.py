@@ -130,6 +130,9 @@ def vcm_dataset_from_l2_orbits(cal333, cal5, csat, slow=False):
     create a vcm dataset containing cloud masks from calipso 333m, calipso 5km, and cloudsat data.
     '''
     
+    if cal333 is None or cal5 is None or csat is None:
+        return None
+    
     vcm = orbit_vcm_cal333.vcm_dataset_from_l2_orbit(cal333)
     if vcm is None:
         return None
