@@ -19,7 +19,7 @@ def grid_vcm_from_vcm_orbit(vcm_orbit, lstep=2.):
     plon = data['lon'].values
     plat = data['lat'].values
     
-    altitude = data['vcm_cal05'].labels[1]
+    altitude = data['vcm_csat+cal333-5'].labels[1]
     nalt = altitude.shape[0]
     
     out = da.Dataset()
@@ -75,28 +75,6 @@ def grid_vcm_file_from_vcm_orbit(vcm_orbit, where='./out/'):
     dataset.write_nc(where + outname, mode='w', zlib=True, complevel=9)
 
 
-combined_rules = {'vcm_csat_cal05':['vcm_csat', 'vcm_cal05'],
-            'vcm_csat_cal0520':['vcm_csat', 'vcm_cal05', 'vcm_cal20'],
-            'vcm_csat_cal052080':['vcm_csat', 'vcm_cal05', 'vcm_cal20', 'vcm_cal80']
-            }
-
-
-def add_combined_datasets(dataset):
-
-    for combined_name in combined_rules:
-        combined = None
-        for to_combine in combined_rules[combined]:
-            if combined is None:
-                combined = dataset[to_combine]
-            else:
-                combined += dataset[to_combine]
-        idx = (combined > 1)
-        combined.ix[idx] = 1
-        dataset[combined_name] = combined
-    
-    return combined
-
-
 def grid_vcm_file_from_vcm_orbits(vcm_orbits, outname, where='./out'):
     
     import os
@@ -111,9 +89,6 @@ def grid_vcm_file_from_vcm_orbits(vcm_orbits, outname, where='./out'):
             for field in fields:
                 dataset[field] += out[field]
         
-
-    dataset = add_combined_datasets(dataset)
-        
     if not os.path.isdir(where):
         print 'Creating dir ' + where
         os.mkdir(where)
@@ -124,19 +99,19 @@ def test_orbit():
     
     import os
     
-    vcm_orbit = './in/200701/vcm_2007-01-01T00-22-49ZN.nc4'
+    vcm_orbit = './in/200801/vcm_2008-01-01T01-30-23ZN.nc4'
+    assert os.path.isfile(vcm_orbit)
     grid_vcm_file_from_vcm_orbit(vcm_orbit, where='./test.out/')
-    
-    assert os.path.isfile('./test.out/vcm_grid_2007-01-01T00-22-49ZN.nc4')
+    assert os.path.isfile('./test.out/vcm_grid_2008-01-01T01-30-23ZN.nc4')
     
     
 def test_orbits():
     
     import glob, os
 
-    vcm_orbits = glob.glob('./in/200701/vcm_2007-01-01*.nc4')
+    vcm_orbits = glob.glob('./in/200801/vcm_2008-01-01*.nc4')
     assert len(vcm_orbits) > 1
 
-    grid_vcm_file_from_vcm_orbits(vcm_orbits, 'vcm_grid_2007-01-01.nc4', where='./test.out/')
+    grid_vcm_file_from_vcm_orbits(vcm_orbits, 'vcm_grid_2008-01-01.nc4', where='./test.out/')
     
-    assert os.path.isfile('./test.out/vcm_grid_2007-01-01.nc4')
+    assert os.path.isfile('./test.out/vcm_grid_2008-01-01.nc4')
