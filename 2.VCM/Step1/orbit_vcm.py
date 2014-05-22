@@ -231,15 +231,17 @@ def test_find_geoprof_file():
     cal333file = 'CAL_LID_L2_333mCLay-ValStage1-V3-01.2008-01-01T01-30-23ZN.hdf'
     y, m, d, orbit_id = _find_orbit_id(cal333file)
     geofile = _find_geoprof_file(y, m, d, orbit_id)
-    assert geofile == caltrack_geoprof_dir + '2008/2008_01_01/CALTRACK-5km_CS-2B-GEOPROF_V1-00_2008-01-01T01-30-23ZN.hdf'
+    assert geofile == caltrack_geoprof_dir[0] + '2008/2008_01_01/CALTRACK-5km_CS-2B-GEOPROF_V1-00_2008-01-01T01-30-23ZN.hdf'
 
 
 def test_find_cal5_file():
     
+    from localpaths import l2dir
+    
     cal333file = 'CAL_LID_L2_333mCLay-ValStage1-V3-01.2008-01-01T01-30-23ZN.hdf'
     y, m, d, orbit_id = _find_orbit_id(cal333file)
     cal5_file = _find_cal5_file(y, m, d, orbit_id)
-    assert cal5_file == l2dir + '/2008/2008_01_01/CAL_LID_L2_05kmCLay-Prov-V3-01.2008-01-01T01-30-23ZN.hdf'
+    assert cal5_file == l2dir[0] + '/2008/2008_01_01/CAL_LID_L2_05kmCLay-Prov-V3-01.2008-01-01T01-30-23ZN.hdf'
     
     
 def test_vcm_file_from_333_orbit():
