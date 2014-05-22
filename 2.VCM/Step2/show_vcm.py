@@ -48,7 +48,7 @@ def aggregate_arrays_from_files(files, array_name, summed_along=None):
 def show_file(filename, title):
     
     data = da.read_nc(filename)
-    vcm05 = data['vcm_cal05']
+    vcm05 = data['vcm_csat+cal333-80']
     vcm_lonlat = vcm05.sum(axis='altitude')
     
     pcolor_vcm(vcm_lonlat, title)
@@ -56,23 +56,24 @@ def show_file(filename, title):
 
 def show_files(files, title):
     
-    vcm = aggregate_arrays_from_files(files, 'vcm_cal05', 'altitude')
+    vcm = aggregate_arrays_from_files(files, 'vcm_csat+cal333-80', 'altitude')
     nprof = aggregate_arrays_from_files(files, 'nprof')
+    print vcm, nprof
     cloudypoints = vcm / nprof
     cloudypoints[nprof==0] = 0
     pcolor_vcm(cloudypoints, 'cloudy points in profiles : ' + title)
     plt.clim(0,120)
 
 
-def main(vcm_grid_file='./test.out/vcm_grid_2007-01-01.nc4'):
+def main(vcm_grid_file='./test.out/200801/vcm_grid_2008-01-01.nc4'):
     
     import glob
     
     show_file(vcm_grid_file, vcm_grid_file)
     
-    mask = 'out/200701/vcm_grid_*.nc4'
-    grid_files = glob.glob(mask)
-    show_files(grid_files, '200701')
+    #mask = 'out/200801/vcm_grid_*.nc4'
+    #grid_files = glob.glob(mask)
+    #show_files(grid_files, '200801')
     
     plt.show()
     
