@@ -201,7 +201,7 @@ def _test_files():
 def test_vcm_dataset_slow():
     
     cal333file, geofile, cal5file = _test_files()
-    vcm = vcm_dataset_from_l2_orbits(cal333file, cal5_file, geofile, slow=True)
+    vcm = vcm_dataset_from_l2_orbits(cal333file, cal5file, geofile, slow=True)
     
     return vcm
 
@@ -209,7 +209,7 @@ def test_vcm_dataset_slow():
 def test_vcm_dataset():
 
     cal333file, geofile, cal5file = _test_files()
-    vcm = vcm_dataset_from_l2_orbits(cal333file, cal5_file, geofile)
+    vcm = vcm_dataset_from_l2_orbits(cal333file, cal5file, geofile)
     
     return vcm
 
