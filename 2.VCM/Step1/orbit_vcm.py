@@ -96,7 +96,7 @@ def combine_vcms(vcm, vcm5, vcmc):
 
 
     reindexed = da.Dataset()
-    reindexed['vcm_cal333'] = vcm['vcm_cal333']    
+    reindexed['vcm_cal333'] = vcm['vcm_cal333']
     
     # remap CALIPSO flag
     for vcm_name in 'vcm_cal05','vcm_cal20', 'vcm_cal80':
@@ -109,6 +109,8 @@ def combine_vcms(vcm, vcm5, vcmc):
     
     # combine these flags
     combined = da.Dataset()
+    combined['lat'] = vcm['lat']
+    combined['lon'] = vcm['lon']
     all_together_now = reindexed['vcm_csat'] + reindexed['vcm_cal333'] + reindexed['vcm_cal05']
     idx = (all_together_now > 0)
     combined['vcm_csat+cal333-5'] = da.DimArray(idx, dtype='uint8')
@@ -241,7 +243,7 @@ def test_find_cal5_file():
     cal333file = 'CAL_LID_L2_333mCLay-ValStage1-V3-01.2008-01-01T01-30-23ZN.hdf'
     y, m, d, orbit_id = _find_orbit_id(cal333file)
     cal5_file = _find_cal5_file(y, m, d, orbit_id)
-    assert cal5_file == l2dir[0] + '/2008/2008_01_01/CAL_LID_L2_05kmCLay-Prov-V3-01.2008-01-01T01-30-23ZN.hdf'
+    assert cal5_file == l2dir[2] + '/2008/2008_01_01/CAL_LID_L2_05kmCLay-Prov-V3-01.2008-01-01T01-30-23ZN.hdf'
     
     
 def test_vcm_file_from_333_orbit():
