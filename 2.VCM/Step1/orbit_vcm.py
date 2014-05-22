@@ -44,6 +44,7 @@ def _find_geoprof_file(year, month, day, orbit_id):
     '''
     
     path = localpaths.caltrack_geoprof_dir[0] + '%04d/' % year
+    print path
     folder = '%04d_%02d_%02d/' % (year, month, day)
     
     geofile = path + folder + 'CALTRACK-5km_CS-2B-GEOPROF_V1-00_' + orbit_id + '.hdf'
@@ -178,12 +179,26 @@ def vcm_file_from_333_orbit(cal333_file, where='./'):
 
 # TESTS
 
+
+def _test_files():
+
+    from localpaths import hostname, icare_id, climserv_id
+
+    if hostname.endswith(icare_id):
+        cal333file = '/DATA/LIENS/CALIOP/333mCLay/2008/2008_01_01/CAL_LID_L2_333mCLay-ValStage1-V3-01.2008-01-01T01-30-23ZN.hdf'
+        geofile = '/DATA/LIENS/CALIOP/CALTRACK-5km_CS-2B-GEOPROF//2008/2008_01_01/CALTRACK-5km_CS-2B-GEOPROF_V1-00_2008-01-01T01-30-23ZN.hdf'
+        cal5_file = '/DATA/LIENS/CALIOP/05kmCLay/2008/2008_01_01/CAL_LID_L2_05kmCLay-Prov-V3-01.2008-01-01T01-30-23ZN.hdf'
+    elif hostname.endswith(climserv_id):
+        cal333file = '/homedata/noel/Data/333mCLay/2008/2008_01_01/CAL_LID_L2_333mCLay-ValStage1-V3-01.2008-01-01T01-30-23ZN.hdf'
+        geofile = '/bdd/CFMIP/OBS_LOCAL/ATRAIN_COLOC/CLOUDSAT_COLOC/CALTRACK-GEOPROF/2008/2008_01_01/CALTRACK-5km_CS-2B-GEOPROF_V1-00_2008-01-01T01-30-23ZN.hdf'
+        cal5_file = '/bdd/CALIPSO/Lidar_L2/05kmCLay.v3.01/2008/2008_01_01/CAL_LID_L2_05kmCLay-Prov-V3-01.2008-01-01T01-30-23ZN.hdf'
+
+    return cal333file, geofile, cal5file
+
+
 def test_vcm_dataset_slow():
     
-    cal333file = '/homedata/noel/Data/333mCLay/2008/2008_01_01/CAL_LID_L2_333mCLay-ValStage1-V3-01.2008-01-01T01-30-23ZN.hdf'
-    geofile = '/bdd/CFMIP/OBS_LOCAL/ATRAIN_COLOC/CLOUDSAT_COLOC/CALTRACK-GEOPROF/2008/2008_01_01/CALTRACK-5km_CS-2B-GEOPROF_V1-00_2008-01-01T01-30-23ZN.hdf'
-    cal5_file = '/bdd/CALIPSO/Lidar_L2/05kmCLay.v3.01/2008/2008_01_01/CAL_LID_L2_05kmCLay-Prov-V3-01.2008-01-01T01-30-23ZN.hdf'
-    
+    cal333file, geofile, cal5file = _test_files()
     vcm = vcm_dataset_from_l2_orbits(cal333file, cal5_file, geofile, slow=True)
     
     return vcm
@@ -191,10 +206,7 @@ def test_vcm_dataset_slow():
     
 def test_vcm_dataset():
 
-    cal333file = '/homedata/noel/Data/333mCLay/2008/2008_01_01/CAL_LID_L2_333mCLay-ValStage1-V3-01.2008-01-01T01-30-23ZN.hdf'
-    geofile = '/bdd/CFMIP/OBS_LOCAL/ATRAIN_COLOC/CLOUDSAT_COLOC/CALTRACK-GEOPROF/2008/2008_01_01/CALTRACK-5km_CS-2B-GEOPROF_V1-00_2008-01-01T01-30-23ZN.hdf'
-    cal5_file = '/bdd/CALIPSO/Lidar_L2/05kmCLay.v3.01/2008/2008_01_01/CAL_LID_L2_05kmCLay-Prov-V3-01.2008-01-01T01-30-23ZN.hdf'
-    
+    cal333file, geofile, cal5file = _test_files()
     vcm = vcm_dataset_from_l2_orbits(cal333file, cal5_file, geofile)
     
     return vcm
