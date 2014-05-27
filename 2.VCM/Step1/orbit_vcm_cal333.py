@@ -44,7 +44,11 @@ def vcm_dataset_from_l2_orbit(filename):
     
     print 'Creating vcm from l2 file ' + filename
     
-    l2 = level2.Cal2(filename)
+    try:
+        l2 = level2.Cal2(filename)
+    except:
+        return None
+    
     lon, lat = l2.coords()
     tai_time = l2.time()
     nl, base, top = l2.layers()
