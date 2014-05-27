@@ -32,6 +32,8 @@ def _find_cal5_file(year, month, day, orbit_id):
     '''
 
     cal5file = calipso_local.l2_file_from_orbit(year, month, day, orbit_id)
+    if cal5file is None:
+        return None
     if os.path.isfile(cal5file):
         return cal5file
     else:
