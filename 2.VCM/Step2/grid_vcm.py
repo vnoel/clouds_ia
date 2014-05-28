@@ -19,6 +19,11 @@ def grid_vcm_from_vcm_orbit(vcm_orbit, lstep=2.):
     plon = data['lon'].values
     plat = data['lat'].values
     
+    if 'vcm_csat+cal333-5' not in data or 'vcm_csat+cal333-20' not in data or 'vcm_csat+cal333-80' not in data:
+        print 'Warning : all gridded vcms are not present in file. Contained data :'
+        print data
+        return None
+    
     altitude = data['vcm_csat+cal333-5'].labels[1]
     nalt = altitude.shape[0]
     
