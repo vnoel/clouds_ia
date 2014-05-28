@@ -57,7 +57,7 @@ def _find_geoprof_file(year, month, day, orbit_id):
         return None
 
 def combine_vcms_slow(vcm, vcm5, vcmc):
-    # this is nifty but very slow. It will be nicer to do things myself.
+    # this is nifty but very slow. It will be faster to do things myself.
     
     for vcm_name in 'vcm_cal05', 'vcm_cal20', 'vcm_cal80':
         this = vcm5[vcm_name]
@@ -113,12 +113,17 @@ def combine_vcms(vcm, vcm5, vcmc):
     combined = da.Dataset()
     combined['lat'] = vcm['lat']
     combined['lon'] = vcm['lon']
+    
+    combined['vcm_cal333'] = reindexed['vcm_cal333']
+    
     all_together_now = reindexed['vcm_csat'] + reindexed['vcm_cal333'] + reindexed['vcm_cal05']
     idx = (all_together_now > 0)
     combined['vcm_csat+cal333-5'] = da.DimArray(idx, dtype='uint8')
+    
     all_together_now += reindexed['vcm_cal20']
     idx = (all_together_now > 0)
     combined['vcm_csat+cal333-20'] = da.DimArray(idx, dtype='uint8')
+    
     all_together_now += reindexed['vcm_cal80']
     idx = (all_together_now > 0)
     combined['vcm_csat+cal333-80'] = da.DimArray(idx, dtype='uint8')
@@ -205,12 +210,12 @@ def _test_files():
     return cal333file, geofile, cal5file
 
 
-def test_vcm_dataset_slow():
-    
-    cal333file, geofile, cal5file = _test_files()
-    vcm = vcm_dataset_from_l2_orbits(cal333file, cal5file, geofile, slow=True)
-    
-    return vcm
+#def test_vcm_dataset_slow():
+#    
+#    cal333file, geofile, cal5file = _test_files()
+#    vcm = vcm_dataset_from_l2_orbits(cal333file, cal5file, geofile, slow=True)
+#    
+#    return vcm
 
     
 def test_vcm_dataset():
@@ -257,4 +262,4 @@ def test_vcm_file_from_333_orbit():
     
     cal333file = '/homedata/noel/Data/333mCLay/2008/2008_01_01/CAL_LID_L2_333mCLay-ValStage1-V3-01.2008-01-01T01-30-23ZN.hdf'    
     vcm_file_from_333_orbit(cal333file, where='./test.out/')
-    assert os.path.isfile('./test.out/vcm_2008-01-01T01-30-23ZN.nc4')
+    assert os.path.isfile('./test.out/200801/vcm_2008-01-01T01-30-23ZN.nc4')
