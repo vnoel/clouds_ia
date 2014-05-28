@@ -26,7 +26,7 @@ def main(input='test.out/200801/vcm_2008-01-01T01-30-23ZN.nc4'):
     
     fig = plt.figure(figsize=[12,12])
     vcm = da.read_nc(input)
-    plot_vcm(vcm)
+    plot_vcm(vcm, 'vcm_cal333')
 
 
 if __name__ == '__main__':
