@@ -30,9 +30,9 @@ def grid_vcm_from_vcm_orbit(vcm_orbit, lstep=2.):
             continue
         
         this_vcm = data[field].values
-        # we're binning profiles at 5km res
-        # for one day, no chance to get more than ~50 5km profiles in a 2x2 box.
-        # no guarantees for other resolutions or periods !
+        # we're binning profiles at 333m res
+        # in one day, ~750 5km profiles in a 2x2 box.
+        # needs at least uint16.
         vcm_3d = np.zeros([nlon, nlat, nalt], dtype='uint8')
         nprof = np.zeros([nlon, nlat], dtype='uint8')
         
