@@ -22,7 +22,7 @@ def plot_vcms(vcm):
             i += 1
     plt.show()
 
-def main(input='test.out/200701/vcm_2007-01-01T00-22-49ZN.nc4'):
+def main(input='test.out/200801/vcm_2008-01-01T01-30-23ZN.nc4'):
     
     fig = plt.figure(figsize=[12,12])
     vcm = da.read_nc(input)
