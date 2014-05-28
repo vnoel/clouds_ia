@@ -20,12 +20,9 @@ def vcm_from_layers(nl, base, top, ltype):
         
     # clean up unwanted layers first
     # for clouds, feature type == layer_type == 2
-    basecopy[ltype != 2] = -9999.
+    #basecopy[ltype != 2] = -9999.
     
     for i in xrange(nprof):
-        
-        if nl[i] == 0:
-            continue
         
         for j in xrange(nl[i]):
             

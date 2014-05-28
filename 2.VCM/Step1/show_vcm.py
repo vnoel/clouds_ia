@@ -11,6 +11,8 @@ def plot_vcm(vcm,field):
     va = vcm[field]
     plt.pcolormesh(va.labels[0][3000:5000], va.labels[1], va.values[3000:5000,:].T, cmap=plt.cm.gray_r)
     plt.title(field)
+    plt.savefig('test.png')
+    plt.show()
     
 def plot_vcms(vcm):
     
@@ -26,7 +28,7 @@ def main(input='test.out/200801/vcm_2008-01-01T01-30-23ZN.nc4'):
     
     fig = plt.figure(figsize=[12,12])
     vcm = da.read_nc(input)
-    plot_vcm(vcm, 'vcm_cal333')
+    plot_vcm(vcm, 'vcm_csat+cal333-5')
 
 
 if __name__ == '__main__':
