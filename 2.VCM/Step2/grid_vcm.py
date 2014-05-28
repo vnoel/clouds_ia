@@ -87,6 +87,8 @@ def grid_vcm_file_from_vcm_orbits(vcm_orbits, outname, where='./out'):
     dataset = None
     for vcm_orbit in vcm_orbits:
         out = grid_vcm_from_vcm_orbit(vcm_orbit)
+        if out is None:
+            return
         if dataset is None:
             dataset = out
             fields = dataset.keys()
