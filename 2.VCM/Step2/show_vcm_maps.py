@@ -15,10 +15,10 @@ def pcolor_vcm(x, y, vcmarray, title=None):
     m = Basemap()
 
     plt.figure(figsize=[10,5])
-    plt.pcolormesh(x, y, vcmarray.T)
-    #m.drawcoastlines()
+    m.pcolormesh(x, y, vcmarray.T)
+    m.drawcoastlines()
     plt.colorbar()
-    plt.clim(0, 60000)
+    plt.clim(0, 20)
     if title is not None:
         plt.title(title)
 
@@ -64,8 +64,6 @@ def show_files(files, title):
     
     cloudypoints = np.ma.masked_where(nprof.values==0, 1. * vcm.values / nprof.values)
     cloudypoints = np.ma.masked_invalid(cloudypoints)
-    
-    cloudypoints = vcm.values
     
     pcolor_vcm(vcm.labels[0], vcm.labels[1], cloudypoints, 'cloudy points in profiles : ' + title)
     #plt.clim(0,100)
