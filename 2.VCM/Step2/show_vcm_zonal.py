@@ -55,7 +55,7 @@ def show_file(filename, title):
 
 def show_files(files, title):
     
-    vcm = aggregate_arrays_from_files(files, 'vcm_cal333', 'lat', [0, 5])
+    vcm = aggregate_arrays_from_files(files, 'vcm_cal333', 'lon')
     nprof = aggregate_arrays_from_files(files, 'nprof', 'lon')
     #cloudypoints = da.DimArray(vcm / nprof, labels=vcm.labels, dims=vcm.dims)
     zonal_vcm(vcm, 'cloudy points in profiles : ' + title)
