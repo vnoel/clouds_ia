@@ -8,22 +8,18 @@ import dimarray as da
 import matplotlib.pyplot as plt
 
 
-def pcolor_vcm(x, y, vcmarray, title=None):
-
-    from mpl_toolkits.basemap import Basemap
-
-    m = Basemap()
+def zonal_vcm(vcm, title=None):
 
     plt.figure(figsize=[10,5])
-    m.pcolormesh(x, y, vcmarray.T)
-    m.drawcoastlines()
+    #plt.pcolormesh(vcm.labels[0], vcm.labels[1], vcm.values.T)
+    vcm.T.pcolor()
     plt.colorbar()
-    plt.clim(0, 20)
+    plt.clim(0, 8000)
     if title is not None:
         plt.title(title)
 
 
-def aggregate_arrays_from_files(files, array_name, summed_along=None):
+def aggregate_arrays_from_files(files, array_name, summed_along=None, bounds=None):
     
     aggregated = None
 
@@ -54,26 +50,21 @@ def show_file(filename, title):
     vcm05 = data['vcm_cal333']
     vcm_lonlat = 1. * vcm05.sum(axis='altitude') / data['nprof']
     
-    pcolor_vcm(vcm_lonlat, title)
+    zonal_vcm(vcm_lonlat, title)
 
 
 def show_files(files, title):
     
-    vcm = aggregate_arrays_from_files(files, 'vcm_cal333', 'altitude')
-    nprof = aggregate_arrays_from_files(files, 'nprof')
-    
-    cloudypoints = np.ma.masked_where(nprof.values==0, 1. * vcm.values / nprof.values)
-    cloudypoints = np.ma.masked_invalid(cloudypoints)
-    
-    pcolor_vcm(vcm.labels[0], vcm.labels[1], cloudypoints, 'cloudy points in profiles : ' + title)
+    vcm = aggregate_arrays_from_files(files, 'vcm_cal333', 'lon')
+    nprof = aggregate_arrays_from_files(files, 'nprof', 'lon')
+    #cloudypoints = da.DimArray(vcm / nprof, labels=vcm.labels, dims=vcm.dims)
+    zonal_vcm(vcm, 'cloudy points in profiles : ' + title)
     #plt.clim(0,100)
 
 
 def main(vcm_grid_file='./out/200707/vcm_grid_2007-07-01.nc4'):
     
     import glob
-    
-    #show_file(vcm_grid_file, vcm_grid_file)
     
     mask = 'out/200707/vcm_grid_*.nc4'
     grid_files = glob.glob(mask)
