@@ -39,6 +39,7 @@ def grid_vcm_from_vcm_orbit(vcm_orbit, lstep=2.):
         # in one day, ~750 5km profiles in a 2x2 box.
         # needs at least uint16.
         vcm_3d = np.zeros([nlon, nlat, nalt], dtype='uint8')
+        cprof = np.zeros([nlon, nlat], dtype='uint8')
         nprof = np.zeros([nlon, nlat], dtype='uint8')
         
         for ilon, lon in enumerate(lonbins):
@@ -57,10 +58,19 @@ def grid_vcm_from_vcm_orbit(vcm_orbit, lstep=2.):
                 if this_nprof == 0:
                     continue
             
+                # number of profiles in the box
                 nprof[ilon, ilat] = this_nprof
+                
+                # vertical cloud mask in the box
                 vcm_3d[ilon, ilat, :] = np.sum(vcm_slice[idx,:], axis=0)
+                
+                # number of cloudy profiles in the box
+                cloudyprofileflags = np.sum(vcm_slice[idx,:], axis=1) > 0
+                cprof[ilon, ilat] = np.sum(cloudyprofileflags)
+                
         
         out[field] = da.DimArray(vcm_3d, labels=[lonbins, latbins, altitude], dims=['lon', 'lat', 'altitude'])
+        out[field+'_cprof'] = da.DimArray(cprof, labels=[lonbins, latbins], dims=['lon', 'lat'])
         if 'nprof' not in out:
             out['nprof'] = da.DimArray(nprof, labels=[lonbins, latbins], dims=['lon', 'lat'])
     
