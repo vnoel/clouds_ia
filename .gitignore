@@ -3,6 +3,6 @@
 __pycache__
 *.pyc
 out
-in
+2.Gridded_VCM/in
 *.e*
 *.o*

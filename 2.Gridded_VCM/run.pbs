@@ -9,4 +9,4 @@ export PATH=/home/noel/miniconda/bin:$PATH
 export PYTHONPATH=/home/noel/pycode
 
 cd $PBS_O_WORKDIR
-./scan_vcm_orbits.py $year 7
+./scan_vcm_orbits.py $year 
