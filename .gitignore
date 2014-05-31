@@ -3,6 +3,6 @@
 __pycache__
 *.pyc
 out
-in
+*/in
 *.e*
 *.o*

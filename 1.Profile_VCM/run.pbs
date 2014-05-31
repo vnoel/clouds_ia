@@ -3,10 +3,10 @@
 
 #PBS -N vcm1
 #PBS -m e
-#PBS -l walltime=1:00:00
+#PBS -l walltime=15:00:00
 
 export PATH=/home/noel/miniconda/bin:$PATH
 export PYTHONPATH=/home/noel/pycode
 
 cd $PBS_O_WORKDIR
-./scan_orbits.py $year $month
+./scan_orbits.py $year

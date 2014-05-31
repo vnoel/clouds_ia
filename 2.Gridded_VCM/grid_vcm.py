@@ -20,7 +20,7 @@ def grid_vcm_from_vcm_orbit(vcm_orbit, lstep=2.):
     plat = data['lat'].values
     
     if 'vcm_csat+cal333-5' not in data or 'vcm_csat+cal333-20' not in data or 'vcm_csat+cal333-80' not in data:
-        print 'Warning : all gridded vcms are not present in file. Contained data :'
+        print 'Warning : some vcms are not present in file. Contained data :'
         print data
         return None
     
@@ -38,9 +38,9 @@ def grid_vcm_from_vcm_orbit(vcm_orbit, lstep=2.):
         # we're binning profiles at 333m res
         # in one day, ~750 5km profiles in a 2x2 box.
         # needs at least uint16.
-        vcm_3d = np.zeros([nlon, nlat, nalt], dtype='uint8')
-        cprof = np.zeros([nlon, nlat], dtype='uint8')
-        nprof = np.zeros([nlon, nlat], dtype='uint8')
+        vcm_3d = np.zeros([nlon, nlat, nalt], dtype='uint16')
+        nprof = np.zeros([nlon, nlat], dtype='uint16')
+        cprof = np.zeros([nlon, nlat], dtype='uint16')
         
         for ilon, lon in enumerate(lonbins):
             
