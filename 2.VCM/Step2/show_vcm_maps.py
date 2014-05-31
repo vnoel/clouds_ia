@@ -18,7 +18,7 @@ def pcolor_vcm(x, y, vcmarray, title=None):
     m.pcolormesh(x, y, vcmarray.T)
     m.drawcoastlines()
     plt.colorbar()
-    plt.clim(0, 20)
+    plt.clim(0, 1.2)
     if title is not None:
         plt.title(title)
 
@@ -28,6 +28,7 @@ def aggregate_arrays_from_files(files, array_name, summed_along=None):
     aggregated = None
 
     files.sort()
+    prevmax = 0
 
     for f in files:
 
@@ -43,7 +44,9 @@ def aggregate_arrays_from_files(files, array_name, summed_along=None):
         else:
             aggregated += array
         
-        print aggregated.max()
+        if aggregated.max() < prevmax:
+            print 'PROBLEME !'
+            print 'Previous maximum = ', prevmax, ', current max = ', aggregated.max()
 
     return aggregated
 
@@ -59,13 +62,14 @@ def show_file(filename, title):
 
 def show_files(files, title):
     
-    vcm = aggregate_arrays_from_files(files, 'vcm_cal333', 'altitude')
+    #vcm = aggregate_arrays_from_files(files, 'vcm_cal333', 'altitude')
+    cprof = aggregate_arrays_from_files(files, 'vcm_csat+cal333-80_cprof')
     nprof = aggregate_arrays_from_files(files, 'nprof')
     
-    cloudypoints = np.ma.masked_where(nprof.values==0, 1. * vcm.values / nprof.values)
+    cloudypoints = np.ma.masked_where(nprof.values==0, 1. * cprof.values / nprof.values)
     cloudypoints = np.ma.masked_invalid(cloudypoints)
     
-    pcolor_vcm(vcm.labels[0], vcm.labels[1], cloudypoints, 'cloudy points in profiles : ' + title)
+    pcolor_vcm(cprof.labels[0], cprof.labels[1], cloudypoints, 'cloud fraction ' + title)
     #plt.clim(0,100)
 
 
@@ -75,11 +79,15 @@ def main(vcm_grid_file='./out/200707/vcm_grid_2007-07-01.nc4'):
     
     #show_file(vcm_grid_file, vcm_grid_file)
     
-    mask = 'out/200707/vcm_grid_*.nc4'
+    mask = 'out/200706/vcm_grid_*.nc4'
     grid_files = glob.glob(mask)
+    mask = 'out/200707/vcm_grid_*.nc4'
+    grid_files += glob.glob(mask)
+    mask = 'out/200708/vcm_grid_*.nc4'
+    grid_files += glob.glob(mask)
     grid_files.sort()
 
-    show_files(grid_files, '200701-200703')
+    show_files(grid_files, '2007 JJA')
     
     plt.show()
     
