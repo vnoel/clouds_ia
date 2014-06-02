@@ -26,7 +26,7 @@ def process_vcm_orbits_period(start, end, where):
             continue
         
         outpath = where + '%04d%02d/' % (current.year, current.month)
-        outname = 'vcm_grid_%04d-%02d-%02d.nc4' % (current.year, current.month, current.day)
+        outname = 'vcm_zonal_%04d-%02d-%02d.nc4' % (current.year, current.month, current.day)
         
         zone_vcm_file_from_vcm_orbits(vcm_files, outname, where=outpath)
         
@@ -57,7 +57,7 @@ def test_day_grid_for_orbits():
     
     orbit_files = glob.glob('in/200701/vcm_2007-07-07*.nc4')
     main(2007,1,1,where='test.out/')
-    assert os.path.isfile('test.out/200701/vcm_grid_2007-01-01.nc4')
+    assert os.path.isfile('test.out/200701/vcm_zonal_2007-01-01.nc4')
         
 
 if __name__=='__main__':
