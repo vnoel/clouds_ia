@@ -63,11 +63,11 @@ def show_files(files, title):
     pcolor_ctop(ctopsum.labels[0], ctopsum.labels[1], ctop, 'Average cloud top ' + title)
 
 
-def main(vcm_grid_file='./out/200707/ctop_2007-07-01.nc4'):
+def main():
     
     import glob
     
-    mask = 'test.out/ctop_*.nc4'
+    mask = 'out/200701/*.nc4'
     grid_files = glob.glob(mask)
     # mask = 'out/200707/vcm_grid_*.nc4'
     # grid_files += glob.glob(mask)

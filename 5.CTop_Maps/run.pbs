@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+# qsub run.pbs -v year='2007'
+
+#PBS -N ctop
+#PBS -m e
+#PBS -l walltime=15:00:00
+
+export PATH=/home/noel/miniconda/bin:$PATH
+export PYTHONPATH=/home/noel/pycode
+
+cd $PBS_O_WORKDIR
+./scan_vcm_orbits.py $year 
