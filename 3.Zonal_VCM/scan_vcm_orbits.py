@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 #encoding:utf-8
 
-# Created by VNoel on 2014-04-28
+# Forked by VNoel on 2014-06-02
 
 from datetime import datetime, timedelta
-from grid_vcm import grid_vcm_file_from_vcm_orbits
+from zone_vcm import zone_vcm_file_from_vcm_orbits
 import glob
 import os
     
@@ -28,7 +28,7 @@ def process_vcm_orbits_period(start, end, where):
         outpath = where + '%04d%02d/' % (current.year, current.month)
         outname = 'vcm_grid_%04d-%02d-%02d.nc4' % (current.year, current.month, current.day)
         
-        grid_vcm_file_from_vcm_orbits(vcm_files, outname, where=outpath)
+        zone_vcm_file_from_vcm_orbits(vcm_files, outname, where=outpath)
         
         current += timedelta(days=1)
 
@@ -55,9 +55,9 @@ def test_day_grid_for_orbits():
     
     import os
     
-    orbit_files = glob.glob('in/200801/vcm_2008-01-01*.nc4')
-    main(2008,1,1,where='test.out/')
-    assert os.path.isfile('test.out/200801/vcm_grid_2008-01-01.nc4')
+    orbit_files = glob.glob('in/200701/vcm_2007-07-07*.nc4')
+    main(2007,1,1,where='test.out/')
+    assert os.path.isfile('test.out/200701/vcm_grid_2007-01-01.nc4')
         
 
 if __name__=='__main__':
