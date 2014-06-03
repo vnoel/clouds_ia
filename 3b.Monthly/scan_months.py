@@ -33,15 +33,18 @@ def dayfiles_to_monthfile(files, outfile):
     monthly_sum.write_nc(outfile, 'w')
 
 
-def scan_months(year, months):
+def scan_months(year, months, where='./out/'):
     
-    import glob
+    import glob, os
     
     for month in months:
         mask = 'in/%04d%02d/*.nc4' % (year, month)
         dayfiles = glob.glob(mask)
         dayfiles.sort()
-        outfile = 'out/vcm_zonal_%04d%02d.nc4' % (year, month)
+        if not os.path.isdir(where):
+            print('Creating '+where)
+            ok.mkdir(where)
+        outfile = where + '%04d/vcm_zonal_%04d%02d.nc4' % (year, year, month)
         dayfiles_to_monthfile(dayfiles, outfile)
     
 
