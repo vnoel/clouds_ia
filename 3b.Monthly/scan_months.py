@@ -17,12 +17,12 @@ def dayfiles_sum_dataset(files):
         data = da.read_nc(f)
         for array_name in data:
             
-            array = data[array_name]
+            # array = data[array_name]
 
             if array_name not in aggregated:
-                aggregated[array_name] = 1. * array
+                aggregated[array_name] = data[array_name]
             else:
-                aggregated[array_name] += array
+                aggregated[array_name] += data[array_name]
         
     return aggregated
 
