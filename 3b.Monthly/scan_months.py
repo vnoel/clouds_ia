@@ -44,7 +44,7 @@ def scan_months(year, months, where='./out/'):
         if not os.path.isdir(where):
             print('Creating '+where)
             os.mkdir(where)
-        if not os.path.isdir(where+'%04d' % year)
+        if not os.path.isdir(where+'%04d' % year):
             print('Creating '+where + '%04d' % year)
             os.mkdir(where + '%04d' % year)
         outfile = where + '%04d/vcm_zonal_%04d%02d.nc4' % (year, year, month)
