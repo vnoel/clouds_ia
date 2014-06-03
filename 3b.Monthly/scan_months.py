@@ -41,7 +41,7 @@ def scan_months(year, months):
         mask = 'in/%04d%02d/*.nc4' % (year, month)
         dayfiles = glob.glob(mask)
         dayfiles.sort()
-        outfile = 'out/vmc_zonal_%04d%02d.nc4' % (year, month)
+        outfile = 'out/vcm_zonal_%04d%02d.nc4' % (year, month)
         dayfiles_to_monthfile(dayfiles, outfile)
     
 
