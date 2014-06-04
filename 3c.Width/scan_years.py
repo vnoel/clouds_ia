@@ -49,7 +49,9 @@ def scan_years(years, where='./out/'):
             tropic_min.append(tropic_range[0])
             tropic_max.append(tropic_range[1])
             
-            print datetimes, tropic_min, tropic_max
+            print datetimes[-1], tropic_min[-1], tropic_max[-1]
+
+    np.savez('tropic_width.npz', tmin=tropic_min, tmax=tropic_max, datetimes=datetimes)
 
 def main():
     
