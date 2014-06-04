@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #encoding:utf-8
 
-# Forked by VNoel on 2014-06-02
+# Forked by VNoel on 2014-06-04
 
 import numpy as np
 import dimarray as da
@@ -67,7 +67,7 @@ def show_files(files, title):
     pcolor_zonal(vcm_prof.labels[0], vcm_prof.labels[1], cf_lat, 'Cloud fraction ' + title)
 
 
-def main(mask='./out/2007/vcm_zonal_2007*.nc4'):
+def main(mask='./in/2007/vcm_zonal_2007*.nc4'):
     
     import glob
     
