@@ -9,7 +9,7 @@ def tropic_width(lat, alt, vcm, height=16.):
     
     ialt = np.argmin(np.abs(alt-16.))
     vcmslice = vcm[:,ialt]
-    idx = (vcmslice > 0.05)
+    idx = (vcmslice > 0.05) & (lat > -60) & (lat < 60)
     
     latrange = [np.min(lat[idx]), np.max(lat[idx])]
     return latrange
