@@ -30,34 +30,18 @@ def pcolor_zonal(x, y, vcmarray, title=None):
     print 'lat range : ', latrange
     print 'lat width : ', latrange[1]-latrange[0]
     
-
-    lat = x[:-100]
-    altchange = cover_top[100:] - cover_top[:-100]
-
-    ilat = (lat > -40) & (lat < 10)
-    ilatup = (altchange[ilat] > 1.)
-    latup = np.min(lat[ilat][ilatup])
-    ilat = (lat > 10) & (lat < 40)
-    ilatdown = (altchange[ilat] < -1)
-    latdown = np.max(lat[ilat][ilatdown])
-
+    latup, latdown = tropic_width.tropic_width2(x, y, vcmarray)
     plt.figure(figsize=[15,5])
     plt.plot(x, cover_top)
-    plt.axvline(x=latup1)
-    plt.axvline(x=latdown1)
-    plt.axvline(x=latup2)
-    plt.axvline(x=latdown2)
+    plt.axvline(x=latup)
+    plt.axvline(x=latdown)
     
-    plt.figure(figsize=[15,5])
-    plt.plot(lat, altchange)
-    plt.axvline(x=latup1)
-    plt.axvline(x=latdown1)
-    plt.axvline(x=latup2)
-    plt.axvline(x=latdown2)
-    plt.ylim(-2,2)
-    plt.xlim(-40, 40)
-    
-    print 'lat range, second method : ', latup1, latup2, latdown1, latdown2
+    # plt.figure(figsize=[15,5])
+    # plt.plot(x, altchange)
+    # plt.axvline(x=latup)
+    # plt.axvline(x=latdown)
+        
+    print 'lat range, second method : ', latup, latdown
     
 
 

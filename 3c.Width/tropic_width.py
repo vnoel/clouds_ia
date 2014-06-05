@@ -15,6 +15,22 @@ def tropic_width(lat, alt, vcm, height=16.):
     latrange = [np.min(lat[idx]), np.max(lat[idx])]
     return latrange
     
+def tropic_width2(lat, alt, vcm):
+    
+    cover_top = cloud_cover_top(alt, vcm)
+    
+    thislat = lat[:-100]
+    altchange = cover_top[100:] - cover_top[:-100]
+
+    ilat = (thislat > -40) & (thislat < 10)
+    ilatup = (altchange[ilat] > 1.)
+    latup = np.min(thislat[ilat][ilatup])
+    ilat = (thislat > 10) & (thislat < 40)
+    ilatdown = (altchange[ilat] < -1)
+    latdown = np.max(thislat[ilat][ilatdown])
+    return latup, latdown
+    
+    
 def cloud_cover_top(alt, vcm):
     
     nlat = vcm.shape[0]
