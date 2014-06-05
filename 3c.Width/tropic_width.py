@@ -27,7 +27,10 @@ def tropic_width2(lat, alt, vcm):
     latup = np.min(thislat[ilat][ilatup])
     ilat = (thislat > 10) & (thislat < 40)
     ilatdown = (altchange[ilat] < -1)
-    latdown = np.max(thislat[ilat][ilatdown])
+    if np.sum(ilatdown)==0:
+        latdown = thislat[ilat][np.argmin(altchange[ilat])]
+    else:
+        latdown = np.max(thislat[ilat][ilatdown])
     return latup, latdown
     
     
