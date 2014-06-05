@@ -62,6 +62,7 @@ def main(year=2007):
 
     show_files(grid_files, '2007')
     
+    nice.savefig('zonal_cf_%04d.png' % (year))
     plt.show()
     
 
