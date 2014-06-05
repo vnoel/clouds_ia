@@ -6,7 +6,7 @@
 import numpy as np
 import dimarray as da
 import matplotlib.pyplot as plt
-from tropic_width import tropic_width
+import tropic_width
 
 
 def pcolor_zonal(x, y, vcmarray, title=None):
@@ -20,11 +20,45 @@ def pcolor_zonal(x, y, vcmarray, title=None):
     plt.xlim(-82,82)
     plt.xticks(np.r_[-90:90+30:30])
     plt.axhline(y=16, ls='--', color='w')
-    latrange = tropic_width(x, y, vcmarray)
+    latrange = tropic_width.tropic_width(x, y, vcmarray)
     plt.axvline(x=latrange[0], ls='--', color='w')
     plt.axvline(x=latrange[1], ls='--', color='w')
+    
+    cover_top = tropic_width.cloud_cover_top(y, vcmarray)
+    plt.plot(x, cover_top, lw=2, color='w', alpha=0.5)
+    
     print 'lat range : ', latrange
     print 'lat width : ', latrange[1]-latrange[0]
+    
+
+    lat = x[:-100]
+    altchange = cover_top[100:] - cover_top[:-100]
+
+    ilat = (lat > -40) & (lat < 10)
+    ilatup = (altchange[ilat] > 1.)
+    latup = np.min(lat[ilat][ilatup])
+    ilat = (lat > 10) & (lat < 40)
+    ilatdown = (altchange[ilat] < -1)
+    latdown = np.max(lat[ilat][ilatdown])
+
+    plt.figure(figsize=[15,5])
+    plt.plot(x, cover_top)
+    plt.axvline(x=latup1)
+    plt.axvline(x=latdown1)
+    plt.axvline(x=latup2)
+    plt.axvline(x=latdown2)
+    
+    plt.figure(figsize=[15,5])
+    plt.plot(lat, altchange)
+    plt.axvline(x=latup1)
+    plt.axvline(x=latdown1)
+    plt.axvline(x=latup2)
+    plt.axvline(x=latdown2)
+    plt.ylim(-2,2)
+    plt.xlim(-40, 40)
+    
+    print 'lat range, second method : ', latup1, latup2, latdown1, latdown2
+    
 
 
 def aggregate_arrays_from_files(files, array_name, summed_along=None):
