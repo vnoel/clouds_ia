@@ -23,7 +23,7 @@ def pcolor_zonal(x, y, vcmarray, title=None):
     # latrange = tropic_width(x, y, vcmarray)
     # plt.axvline(x=latrange[0], ls='--', color='w')
     # plt.axvline(x=latrange[1], ls='--', color='w')
-    latup, latdown = tropic_width.tropic_width2(x, y, vcmarray)
+    latup, latdown = tropic_width.tropic_width3(x, y, vcmarray)
     plt.axvline(x=latup, ls='--', color='w')
     plt.axvline(x=latdown, ls='--', color='w')
     # print 'lat range : ', latrange
