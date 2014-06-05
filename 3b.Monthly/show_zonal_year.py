@@ -6,7 +6,7 @@
 import numpy as np
 import dimarray as da
 import matplotlib.pyplot as plt
-from tropic_width import tropic_width
+import tropic_width
 import niceplots as nice
 
 
