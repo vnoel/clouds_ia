@@ -6,7 +6,7 @@
 import numpy as np
 import dimarray as da
 import matplotlib.pyplot as plt
-from tropic_width import tropic_width
+from tropic_width import tropic_width3
 from datetime import datetime
 
 
@@ -22,7 +22,7 @@ def month_tropic_width(monthfile):
     cf_lat = cf_lat.T
     cf_lat = np.ma.masked_invalid(cf_lat)
 
-    tropic_range = tropic_width(vcm.labels[0], vcm.labels[1], cf_lat)
+    tropic_range = tropic_width3(vcm.labels[0], vcm.labels[1], cf_lat)
     
     return tropic_range
     

@@ -22,6 +22,8 @@ def tropic_width3(lat, alt, vcm):
     idx = (lat > -10) & (lat < 10)
     height = np.mean(cover_top[idx]) - 2.
     
+    print('Cutting tropic hat at {} km'.format(height))
+    
     ialt = np.argmin(np.abs(alt-height))
     vcmslice = vcm[:,ialt]
     idx = (vcmslice > 0.05) & (lat > -60) & (lat < 60)
