@@ -8,6 +8,7 @@ import numpy as np
 def tropic_width(lat, alt, vcm, height=16.):
     
     ialt = np.argmin(np.abs(alt-16.))
+    print 'Using alt = ', alt[ialt]
     vcmslice = vcm[:,ialt]
     idx = (vcmslice > 0.05) & (lat > -60) & (lat < 60)
     

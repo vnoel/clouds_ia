@@ -21,6 +21,7 @@ def main(infile='tropic_width.npz'):
     plt.subplot(2,1,2)
     plt.plot(time, tmax-tmin)
     plt.ylabel('Tropics meridional height')
+    plt.grid()
     
     plt.show()
     
