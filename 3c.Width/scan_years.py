@@ -16,8 +16,12 @@ def month_tropic_width(monthfile):
         data = da.read_nc(monthfile)
     except:
         return None
-    vcm = 1. * data['vcm_csat+cal333-80']
-    nprof = 1. * data['vcm_csat+cal333-80_cprof']
+    try:
+        vcm = 1. * data['vcm_csat+cal333-80']
+        nprof = 1. * data['vcm_csat+cal333-80_cprof']
+    except KeyError:
+        return None
+        
     cf_lat = vcm.values.T / nprof.values
     cf_lat = cf_lat.T
     cf_lat = np.ma.masked_invalid(cf_lat)
@@ -44,6 +48,7 @@ def scan_years(years, where='./out/'):
         
             tropic_range = month_tropic_width(monthfile)
             if tropic_range is None:
+                
                 continue
             datetimes.append(datetime(year, month, 15))
             tropic_min.append(tropic_range[0])
