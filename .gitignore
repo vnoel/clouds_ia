@@ -8,3 +8,4 @@ out
 *.o*
 .fuse*
 *.npz
+*png
