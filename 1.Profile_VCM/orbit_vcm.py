@@ -46,10 +46,10 @@ def _find_geoprof_file(year, month, day, orbit_id):
     '''
     
     path = localpaths.caltrack_geoprof_dir[0] + '%04d/' % year
-    print path
     folder = '%04d_%02d_%02d/' % (year, month, day)
     
     geofile = path + folder + 'CALTRACK-5km_CS-2B-GEOPROF_V1-00_' + orbit_id + '.hdf'
+    print geofile
     
     if os.path.isfile(geofile):
         return geofile
@@ -138,6 +138,10 @@ def vcm_dataset_from_l2_orbits(cal333, cal5, csat, slow=False):
     '''
     
     if cal333 is None or cal5 is None or csat is None:
+        print 'Erreur - one or more input files missing'
+        print 'cal 333 file : ', cal333
+        print 'cal 5 file : ', cal5
+        print 'csat file : ', csat
         return None
     
     vcm = orbit_vcm_cal333.vcm_dataset_from_l2_orbit(cal333)
