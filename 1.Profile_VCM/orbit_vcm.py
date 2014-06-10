@@ -49,7 +49,6 @@ def _find_geoprof_file(year, month, day, orbit_id):
     folder = '%04d_%02d_%02d/' % (year, month, day)
     
     geofile = path + folder + 'CALTRACK-5km_CS-2B-GEOPROF_V1-00_' + orbit_id + '.hdf'
-    print geofile
     
     if os.path.isfile(geofile):
         return geofile
