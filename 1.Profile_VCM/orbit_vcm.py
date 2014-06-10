@@ -56,18 +56,6 @@ def _find_geoprof_file(year, month, day, orbit_id):
     else:
         return None
 
-def combine_vcms_slow(vcm, vcm5, vcmc):
-    # this is nifty but very slow. It will be faster to do things myself.
-    
-    for vcm_name in 'vcm_cal05', 'vcm_cal20', 'vcm_cal80':
-        this = vcm5[vcm_name]
-        vcm[vcm_name] = this.reindex_axis(vcm['vcm_cal333'].labels[0], method='nearest')
-    
-    vcm['vcm_csat'] = vcmc.reindex_axis(vcm['vcm_cal333'].labels[0], method='nearest')
-    
-    return vcm
-
-
 def remap_profiles(values, n1, n2, nprof333):
     '''
     remap values on 333m profile indices
@@ -77,10 +65,11 @@ def remap_profiles(values, n1, n2, nprof333):
     for i in np.r_[0:values.shape[0]]:
         out[n1[i]:n2[i],:] = values[i,:]
     return out
-    
 
 
 def combine_vcms(vcm, vcm5, vcmc):
+    
+    # vcmc can be None
     
     mintime5, maxtime5 = vcm5['time_min'].values, vcm5['time_max'].values
     
@@ -96,7 +85,8 @@ def combine_vcms(vcm, vcm5, vcmc):
             n += 1
         n2[i] = n-1
 
-
+    # reindex all flags on the same 333m coordinates
+    
     reindexed = da.Dataset()
     reindexed['vcm_cal333'] = vcm['vcm_cal333']
     
@@ -105,31 +95,17 @@ def combine_vcms(vcm, vcm5, vcmc):
         this_vcm = remap_profiles(vcm5[vcm_name].values, n1, n2, time333.shape[0])
         reindexed[vcm_name] = da.DimArray(this_vcm, labels=vcm['vcm_cal333'].labels, dims=vcm['vcm_cal333'].dims)
     
-    #remap cloudsat flag
-    this_vcm = remap_profiles(vcmc.values, n1, n2, time333.shape[0])
+    # remap cloudsat flag
+    if vcmc is None:
+        this_vcm = np.ones_like(reindexed['vcm_cal333'].values) * -9999.
+    else:
+        this_vcm = remap_profiles(vcmc.values, n1, n2, time333.shape[0])
     reindexed['vcm_csat'] = da.DimArray(this_vcm, labels=vcm['vcm_cal333'].labels, dims=vcm['vcm_cal333'].dims)
     
-    # combine these flags
-    combined = da.Dataset()
-    combined['lat'] = vcm['lat']
-    combined['lon'] = vcm['lon']
-    
-    combined['vcm_cal333'] = reindexed['vcm_cal333']
-    
-    all_together_now = reindexed['vcm_csat'] + reindexed['vcm_cal333'] + reindexed['vcm_cal05']
-    idx = (all_together_now > 0)
-    combined['vcm_csat+cal333-5'] = da.DimArray(idx, dtype='uint8')
-    
-    all_together_now += reindexed['vcm_cal20']
-    idx = (all_together_now > 0)
-    combined['vcm_csat+cal333-20'] = da.DimArray(idx, dtype='uint8')
-    
-    all_together_now += reindexed['vcm_cal80']
-    idx = (all_together_now > 0)
-    combined['vcm_csat+cal333-80'] = da.DimArray(idx, dtype='uint8')
-    
-    return combined
-    
+    # Now we have
+    # vcm_cal333, vcm_cal05, vcm_cal20, vcm_cal80, vcm_csat in reindexed.
+        
+    return reindexed
     
 
 def vcm_dataset_from_l2_orbits(cal333, cal5, csat, slow=False):
@@ -137,7 +113,10 @@ def vcm_dataset_from_l2_orbits(cal333, cal5, csat, slow=False):
     create a vcm dataset containing cloud masks from calipso 333m, calipso 5km, and cloudsat data.
     '''
     
-    if cal333 is None or cal5 is None or csat is None:
+    # this function needs at least cal333 and cal5 to exist and contain valid data.
+    # csat can be missing or contain invalid data, that's fine.
+    
+    if cal333 is None or cal5 is None:
         print 'Erreur - one or more input files missing'
         print 'cal 333 file : ', cal333
         print 'cal 5 file : ', cal5
@@ -145,24 +124,17 @@ def vcm_dataset_from_l2_orbits(cal333, cal5, csat, slow=False):
         return None
     
     vcm = orbit_vcm_cal333.vcm_dataset_from_l2_orbit(cal333)
-    if vcm is None:
-        return None
-    
     vcm5 = orbit_vcm_cal5.vcm_dataset_from_l2_orbit(cal5)
-    if vcm5 is None:
+
+    if vcm is None or vcm5 is None:
         return None
+    # make sure the 333m file has more profiles than the 5km one
+    assert vcm['vcm_cal333'].shape[0] > (vcm5['vcm_cal05'].shape[0] * 10)    
     
     vcmc = orbit_vcm_csat.vcm_from_geoprof_file(csat, vcm['vcm_cal333'].labels[1])
-    if vcmc is None:
-        return None
+    # here vcmc can be None if there is no file
     
-    # make sure the 333m file has more profiles than the 5km one
-    assert vcm['vcm_cal333'].shape[0] > (vcm5['vcm_cal05'].shape[0] * 10)
-    
-    if slow:
-        vcm = combine_vcms_slow(vcm, vcm5, vcmc)
-    else:
-        vcm = combine_vcms(vcm, vcm5, vcmc)
+    vcm = combine_vcms(vcm, vcm5, vcmc)
 
     return vcm
     
@@ -203,7 +175,7 @@ def _test_files():
     if hostname.endswith(icare_id):
         print 'icare'
         cal333file = '/DATA/LIENS/CALIOP/333mCLay/2008/2008_01_01/CAL_LID_L2_333mCLay-ValStage1-V3-01.2008-01-01T01-30-23ZN.hdf'
-        geofile = '/DATA/LIENS/CALIOP/CALTRACK-5km_CS-2B-GEOPROF//2008/2008_01_01/CALTRACK-5km_CS-2B-GEOPROF_V1-00_2008-01-01T01-30-23ZN.hdf'
+        geofile = '/DATA/LIENS/CALIOP/CALTRACK-5km_CS-2B-GEOPROF/2008/2008_01_01/CALTRACK-5km_CS-2B-GEOPROF_V1-00_2008-01-01T01-30-23ZN.hdf'
         cal5file = '/DATA/LIENS/CALIOP/05kmCLay/2008/2008_01_01/CAL_LID_L2_05kmCLay-Prov-V3-01.2008-01-01T01-30-23ZN.hdf'
     elif hostname.endswith(climserv_id):
         print 'climserv'
@@ -214,14 +186,6 @@ def _test_files():
     return cal333file, geofile, cal5file
 
 
-#def test_vcm_dataset_slow():
-#    
-#    cal333file, geofile, cal5file = _test_files()
-#    vcm = vcm_dataset_from_l2_orbits(cal333file, cal5file, geofile, slow=True)
-#    
-#    return vcm
-
-    
 def test_vcm_dataset():
 
     cal333file, geofile, cal5file = _test_files()
@@ -263,7 +227,19 @@ def test_find_cal5_file():
 def test_vcm_file_from_333_orbit():
     
     import os
-    
-    cal333file = '/homedata/noel/Data/333mCLay/2008/2008_01_01/CAL_LID_L2_333mCLay-ValStage1-V3-01.2008-01-01T01-30-23ZN.hdf'    
+    cal333file, _, _ = _test_files()
+    assert os.path.isfile(cal333file)
     vcm_file_from_333_orbit(cal333file, where='./test.out/')
-    assert os.path.isfile('./test.out/200801/vcm_2008-01-01T01-30-23ZN.nc4')
+    assert os.path.isfile('./test.out/vcm_2008-01-01T01-30-23ZN.nc4')
+    
+def test_vcm_file_from_333_orbit_without_csat():
+    
+    import os
+    cal333file = '/DATA/LIENS/CALIOP/333mCLay/2011/2011_05_01/CAL_LID_L2_333mCLay-ValStage1-V3-01.2011-05-01T14-53-38ZN.hdf'
+    y, m, d, orbit_id = _find_orbit_id(cal333file)
+    cal5file = _find_cal5_file(y, m, d, orbit_id)
+    geofile = _find_geoprof_file(y, m, d, orbit_id)
+    assert geofile is None
+    vcm = vcm_dataset_from_l2_orbits(cal333file, cal5file, geofile)
+    assert vcm['vcm_csat'].ix[0,0] == -9999.
+    

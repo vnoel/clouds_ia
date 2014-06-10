@@ -30,8 +30,8 @@ def _geoprof_vcm_from_geoprof_file(geoprof_file):
     try:
         geo = GeoProf(geoprof_file)
     except TypeError:
-        print 'Warning, cannot open ' + geoprof_file
-        return None, None
+        print 'Name of CloudSAT file might be missing'
+        return None, None, None
     geovcm = geo.cloudmask()
     geoalt = geo.altitude()
     geotime = geo.time()
