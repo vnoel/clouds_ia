@@ -33,9 +33,12 @@ def pcolor_zonal(x, y, vcmarray, title=None):
 def cf_zonal(filename):
     
     data = da.read_nc(filename)
-    vcm_prof = data['vcm_csat+cal333-80']
-    nprof = data['vcm_csat+cal333-80_cprof']
-
+    try:
+        vcm_prof = data['vcm_csat+cal333-80']
+        nprof = data['vcm_csat+cal333-80_cprof']
+    except KeyError:
+        return None, None, None
+        
     cf_lat = 1. * vcm_prof.values.T / nprof.values
     cf_lat = cf_lat.T
     cf_lat = np.ma.masked_invalid(cf_lat)
@@ -50,6 +53,8 @@ def show_files(files, title):
     for i, filename in enumerate(files):
 
         lat, alt, cf_lat = cf_zonal(filename)
+        if cf_lat is None:
+            continue
         plt.subplot(6,2,i+1)
         pcolor_zonal(lat, alt, cf_lat, filename.split('/')[-1])
 

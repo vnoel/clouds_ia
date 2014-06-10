@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 # qsub run.pbs -v year='2007'
 
-#PBS -N "vcm2"
+#PBS -N zonal
 #PBS -m e
 #PBS -l walltime=15:00:00
 
