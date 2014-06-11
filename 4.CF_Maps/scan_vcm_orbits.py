@@ -4,7 +4,7 @@
 # Forked by VNoel on 2014-06-02
 
 from datetime import datetime, timedelta
-from cf_vcm import grid_vcm_file_from_vcm_orbits
+from cf_vcm import cf_file_from_vcm_orbits
 import glob
 import os
 
@@ -27,7 +27,7 @@ def process_vcm_orbits_period(start, end, where):
         outpath = where + '%04d%02d/' % (current.year, current.month)
         outname = 'vcm_grid_%04d-%02d-%02d.nc4' % (current.year, current.month, current.day)
         
-        grid_vcm_file_from_vcm_orbits(vcm_files, outname, where=outpath)
+        cf_file_from_vcm_orbits(vcm_files, outname, where=outpath)
         
         current += timedelta(days=1)
 

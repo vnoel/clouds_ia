@@ -6,7 +6,26 @@
 import numpy as np
 import dimarray as da
 
-vcm_names = 'vcm_csat+cal333-5', 'vcm_csat+cal333-20', 'vcm_csat+cal333-80', 'vcm_cal333'
+vcm_names = 'csat', 'cal333', 'cal333+cal05', 'cal333+cal05+cal20', 'cal333+cal05+cal20+cal80+csat'
+
+
+def combine_vcms(origin, target_name):
+    
+    if '+' not in target_name:
+        output = origin[target_name]
+    else:
+        names = target_name.split('+')
+        if not all(name in origin for name in names):
+            print 'Warning : some vcms are not present in file. Contained data :'
+            print data
+            return None        
+        output = origin[names[0]]
+        for name in names[1:]:
+            output += origin[name]
+        # FIXME : need to check cloudsat data here
+        output[output > 1] = 1
+    return output
+
 
 def cf_from_vcm_orbit(vcm_orbit, lstep=2.):
     
@@ -17,14 +36,9 @@ def cf_from_vcm_orbit(vcm_orbit, lstep=2.):
     
     # read data
     data = da.read_nc(vcm_orbit)
-    plon = data['lon'].values
-    plat = data['lat'].values
-    
-    if not all(name in data for name in vcm_names):
-        print 'Warning : some vcms are not present in file. Contained data :'
-        print data
-        return None
-    
+    plon = data['lon'].values.astype('float32')
+    plat = data['lat'].values.astype('float32')
+        
     altitude = data[vcm_names[0]].labels[1]
     nalt = altitude.shape[0]
     
@@ -32,7 +46,8 @@ def cf_from_vcm_orbit(vcm_orbit, lstep=2.):
 
     for vcm_name in vcm_names:
         
-        this_vcm = data[vcm_name].values
+        this_vcm = combine_vcms(data, vcm_name)
+        assert this_vcm is not None
         nprof = np.zeros([nlon, nlat], dtype='uint16')
         cprof = np.zeros([nlon, nlat], dtype='uint16')
         
@@ -59,10 +74,13 @@ def cf_from_vcm_orbit(vcm_orbit, lstep=2.):
                 cloudyprofileflags = np.sum(vcm_slice[idx,:], axis=1) > 0
                 cprof[ilon, ilat] = np.sum(cloudyprofileflags)
                 
-        
-        out[vcm_name + '_cprof'] = da.DimArray(cprof, labels=[lonbins, latbins], dims=['lon', 'lat'])
         if 'nprof' not in out:
             out['nprof'] = da.DimArray(nprof, labels=[lonbins, latbins], dims=['lon', 'lat'])
+            out['nprof'].longname = 'Number of measured profiles'
+
+        outname = vcm_name + '_cprof'
+        out[outname] = da.DimArray(cprof, labels=[lonbins, latbins], dims=['lon', 'lat'])
+        out[outname].longname = 'Number of cloudy profiles from cloud mask = ', vcm_name
     
     return out
 
