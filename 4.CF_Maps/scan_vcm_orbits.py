@@ -25,7 +25,7 @@ def process_vcm_orbits_period(start, end, where):
             continue
         
         outpath = where + '%04d%02d/' % (current.year, current.month)
-        outname = 'vcm_grid_%04d-%02d-%02d.nc4' % (current.year, current.month, current.day)
+        outname = 'cf_%04d-%02d-%02d.nc4' % (current.year, current.month, current.day)
         
         cf_file_from_vcm_orbits(vcm_files, outname, where=outpath)
         
