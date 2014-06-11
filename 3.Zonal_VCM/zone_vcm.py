@@ -10,17 +10,32 @@ from numba import jit
 latstep = 0.01
 latbins = np.r_[-82:82+latstep:latstep]
 
-vcm_names = 'vcm_csat+cal333-5', 'vcm_csat+cal333-20', 'vcm_csat+cal333-80', 'vcm_cal333'
+vcm_names = 'cal333', 'cal333+cal05', 'cal333+cal05+cal20', 'cal333+cal05+cal20+cal80', 'cal333+cal05+cal20+cal80+csat'
+
+
+def combine_vcms(origin, target_name):
+    
+    if '+' not in target_name:
+        output = origin[target_name]
+    else:
+        
+        names = target_name.split('+')
+        if not all(name in origin for name in names):
+            print 'Warning : some vcms are not present in file. Contained data :'
+            print origin
+            return None        
+        output = origin[names[0]]
+        for name in names[1:]:
+            output += origin[name]
+        # FIXME : need to check cloudsat data here
+        np.clip(output, -1, 1, out=output.values)
+    return output
 
 
 def zone_vcm_from_vcm_orbit(vcm_orbit, latbins=latbins):
     
     # read data
     data = da.read_nc(vcm_orbit)    
-    if not all(name in data for name in vcm_names):
-        print 'Warning : some vcms are not present in file. Contained data :'
-        print data
-        return None
     
     # create zone_vcm grid
     nlat = latbins.shape[0]
@@ -36,9 +51,8 @@ def zone_vcm_from_vcm_orbit(vcm_orbit, latbins=latbins):
 
     for vcm_name in vcm_names:
         
-        print vcm_name
-                
-        this_vcm = data[vcm_name].values
+        this_vcm = combine_vcms(data, vcm_name)
+        this_vcm = this_vcm.values
         zone_vcm = np.zeros([nlat, nalt], dtype='uint16')
         if 'nprof' not in out:
             nprof = np.zeros([nlat], dtype='uint16')
@@ -51,10 +65,11 @@ def zone_vcm_from_vcm_orbit(vcm_orbit, latbins=latbins):
                 cprof[ilatbin] += 1
                 zone_vcm[ilatbin,:] += this_vcm[i,:]
         
-        out[vcm_name] = da.DimArray(zone_vcm, labels=[latbins, altitude], dims=['lat', 'altitude'])
-        out[vcm_name + '_cprof'] = da.DimArray(cprof, labels=[latbins], dims=['lat'])
         if 'nprof' not in out:
             out['nprof'] = da.DimArray(nprof, labels=[latbins], dims=['lat'])
+        out[vcm_name] = da.DimArray(zone_vcm, labels=[latbins, altitude], dims=['lat', 'altitude'])
+        out[vcm_name].longname = 'Number of cloudy points in lat-z bin, considering ' + vcm_name
+        out[vcm_name + '_cprof'] = da.DimArray(cprof, labels=[latbins], dims=['lat'])
     
     return out
 
