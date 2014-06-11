@@ -18,7 +18,7 @@ havgs_vcm = [5, 20, 80]
 def vcm_from_layers(nl, base, top, havg, ltype, only_havg=None):
     
     nprof = base.shape[0]
-    vcm = np.zeros([nprof, nalt], dtype='uint8')
+    vcm = np.zeros([nprof, nalt], dtype='int8')
     
     # clean up unwanted layers first
     
@@ -67,7 +67,7 @@ def vcm_dataset_from_l2_orbit(filename):
     
     for havg_vcm in havgs_vcm:
         vcm = vcm_from_layers(nl, base, top, havg, ltype, only_havg=havg_vcm)
-        vcm_name = 'vcm_cal%02d' % (havg_vcm)
+        vcm_name = 'cal%02d' % (havg_vcm)
         vertical_cloud_masks[vcm_name] = da.DimArray(vcm, (time_axis, alt_axis))
     
     vertical_cloud_masks['lon'] = da.DimArray(lon, (time_axis,))
@@ -88,7 +88,7 @@ def vcm_file_from_l2_orbit(filename, where='./'):
     if not os.path.isdir(where):
         print 'Creating dir ' + where
         os.mkdir(where)
-    vcm.write_nc(where + 'vcm_cal5_test_' + os.path.basename(filename[:-4]) + '.nc4', mode='w')
+    vcm.write_nc(where + 'cal5_test_' + os.path.basename(filename[:-4]) + '.nc4', mode='w')
     
     
 # test functions
@@ -105,9 +105,9 @@ def test_vcm_nprof():
     vcm = vcm_dataset_from_l2_orbit(l2files[0])
     nprof = vcm['lon'].shape[0]
     assert nprof > 0
-    assert vcm['vcm_cal05'].shape[0] == nprof
-    print vcm['vcm_cal05'].ix[0,:]
-    assert np.all(np.isfinite(vcm['vcm_cal05'][:,:]))
+    assert vcm['cal05'].shape[0] == nprof
+    print vcm['cal05'].ix[0,:]
+    assert np.all(np.isfinite(vcm['cal05'][:,:]))
     
     
 def test_vcm_creation_for_a_day():
@@ -123,7 +123,7 @@ def test_vcm_creation_for_a_day():
     for l2file in l2files:
         vcm_file_from_l2_orbit(l2file, where=out)
     
-    outfiles = glob.glob(out + 'vcm_cal5_test*.nc4')
+    outfiles = glob.glob(out + 'cal5_test*.nc4')
 
     assert len(outfiles)==len(l2files)
     

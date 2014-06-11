@@ -15,7 +15,7 @@ nalt = vcm_alt.shape[0]
 def vcm_from_layers(nl, base, top, ltype):
     
     nprof = base.shape[0]
-    vcm = np.zeros([nprof, nalt], dtype='uint8')
+    vcm = np.zeros([nprof, nalt], dtype='int8')
     basecopy = base.copy()
         
     # clean up unwanted layers first
@@ -54,12 +54,12 @@ def vcm_dataset_from_l2_orbit(filename):
     vertical_cloud_masks = da.Dataset()
     
     time_axis = ('tai_time', tai_time)
-    alt_axis = ('altitude', vcm_alt)
+    alt_axis = ('altitude', vcm_alt.astype('float32'))
     
     vcm = vcm_from_layers(nl, base, top, ltype)
-    vertical_cloud_masks['vcm_cal333'] = da.DimArray(vcm, (time_axis, alt_axis))
-    vertical_cloud_masks['lon'] = da.DimArray(lon, (time_axis,))
-    vertical_cloud_masks['lat'] = da.DimArray(lat, (time_axis,))
+    vertical_cloud_masks['cal333'] = da.DimArray(vcm, (time_axis, alt_axis))
+    vertical_cloud_masks['lon'] = da.DimArray(lon.astype('float32'), (time_axis,))
+    vertical_cloud_masks['lat'] = da.DimArray(lat.astype('float32'), (time_axis,))
 
     return vertical_cloud_masks
     
@@ -77,7 +77,7 @@ def test_vcm_nprof():
     vcm = vcm_dataset_from_l2_orbit(test333)
     nprof = vcm['lon'].shape[0]
     assert nprof == 55920
-    assert vcm['vcm_cal333'].shape[0] == nprof
-    assert vcm['vcm_cal333'].shape[1] == 650
+    assert vcm['cal333'].shape[0] == nprof
+    assert vcm['cal333'].shape[1] == 650
     print nprof
-    assert np.all(np.isfinite(vcm['vcm_cal333'][:,:]))
+    assert np.all(np.isfinite(vcm['cal333'][:,:]))

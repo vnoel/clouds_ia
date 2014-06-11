@@ -55,12 +55,13 @@ def _find_geoprof_file(year, month, day, orbit_id):
     else:
         return None
 
+
 def remap_profiles(values, n1, n2, nprof333):
     '''
     remap values on 333m profile indices
     '''
     
-    out = np.zeros([nprof333, values.shape[1]])
+    out = np.zeros([nprof333, values.shape[1]], dtype='int8')
     for i in np.r_[0:values.shape[0]]:
         out[n1[i]:n2[i],:] = values[i,:]
     return out
@@ -73,10 +74,10 @@ def combine_vcms(vcm, vcm5, vcmc):
     mintime5, maxtime5 = vcm5['time_min'].values, vcm5['time_max'].values
     
     nprof5 = mintime5.shape[0]
-    time333 = vcm['vcm_cal333'].labels[0]
+    time333 = vcm['cal333'].labels[0]
     
     # first find 333m profiles indexes for a given 5km profile
-    n1, n2 = np.zeros(nprof5), np.zeros(nprof5)
+    n1, n2 = np.zeros(nprof5, 'int16'), np.zeros(nprof5, 'int16')
     n = 0
     for i in np.r_[0:nprof5]:
         n1[i] = n
@@ -87,22 +88,24 @@ def combine_vcms(vcm, vcm5, vcmc):
     # reindex all flags on the same 333m coordinates
     
     reindexed = da.Dataset()
-    reindexed['vcm_cal333'] = vcm['vcm_cal333']
+    reindexed['lon'] = vcm['lon']
+    reindexed['lat'] = vcm['lat']
+    reindexed['cal333'] = vcm['cal333']
     
     # remap CALIPSO flag
-    for vcm_name in 'vcm_cal05','vcm_cal20', 'vcm_cal80':
+    for vcm_name in 'cal05','cal20', 'cal80':
         this_vcm = remap_profiles(vcm5[vcm_name].values, n1, n2, time333.shape[0])
-        reindexed[vcm_name] = da.DimArray(this_vcm, labels=vcm['vcm_cal333'].labels, dims=vcm['vcm_cal333'].dims)
+        reindexed[vcm_name] = da.DimArray(this_vcm, labels=vcm['cal333'].labels, dims=vcm['cal333'].dims)
     
     # remap cloudsat flag
     if vcmc is None:
-        this_vcm = np.ones_like(reindexed['vcm_cal333'].values) * -9999.
+        this_vcm = np.ones_like(reindexed['cal333'].values, 'int8') * -1.
     else:
         this_vcm = remap_profiles(vcmc.values, n1, n2, time333.shape[0])
-    reindexed['vcm_csat'] = da.DimArray(this_vcm, labels=vcm['vcm_cal333'].labels, dims=vcm['vcm_cal333'].dims)
+    reindexed['csat'] = da.DimArray(this_vcm, labels=vcm['cal333'].labels, dims=vcm['cal333'].dims)
     
     # Now we have
-    # vcm_cal333, vcm_cal05, vcm_cal20, vcm_cal80, vcm_csat in reindexed.
+    # cal333, cal05, cal20, cal80, csat in reindexed.
         
     return reindexed
     
@@ -128,9 +131,9 @@ def vcm_dataset_from_l2_orbits(cal333, cal5, csat, slow=False):
     if vcm is None or vcm5 is None:
         return None
     # make sure the 333m file has more profiles than the 5km one
-    assert vcm['vcm_cal333'].shape[0] > (vcm5['vcm_cal05'].shape[0] * 10)    
+    assert vcm['cal333'].shape[0] > (vcm5['cal05'].shape[0] * 10)    
     
-    vcmc = orbit_vcm_csat.vcm_from_geoprof_file(csat, vcm['vcm_cal333'].labels[1])
+    vcmc = orbit_vcm_csat.vcm_from_geoprof_file(csat, vcm['cal333'].labels[1])
     # here vcmc can be None if there is no file
     
     vcm = combine_vcms(vcm, vcm5, vcmc)

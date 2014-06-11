@@ -14,7 +14,7 @@ def _geoprof_vcm_on_altitudes(geo_vcm, geo_alt, altitudes):
     nprof = geo_vcm.shape[0]
     nalt = altitudes.shape[0]
 
-    vcm = np.zeros([nprof, nalt], dtype='uint8')
+    vcm = np.zeros([nprof, nalt], dtype='int8')
     for i in np.arange(nprof):
         if np.max(geo_alt[i,:]) < 20:
             continue
