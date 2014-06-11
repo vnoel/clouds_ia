@@ -23,7 +23,7 @@ def combine_vcms(origin, target_name):
         for name in names[1:]:
             output += origin[name]
         # FIXME : need to check cloudsat data here
-        output[output > 1] = 1
+        np.clip(output, -1, 1, out=output.values)
     return output
 
 
