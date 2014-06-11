@@ -32,10 +32,17 @@ def _geoprof_vcm_from_geoprof_file(geoprof_file):
     except TypeError:
         print 'Name of CloudSAT file might be missing'
         return None, None, None
-    geovcm = geo.cloudmask()
-    geoalt = geo.altitude()
-    geotime = geo.time()
-    geo.close()
+        
+    try:
+        geovcm = geo.cloudmask()
+        geoalt = geo.altitude()
+        geotime = geo.time()
+        geo.close()
+    except ValueError:
+        print 'SDreaddata failure while accessing ' + geoprof_file
+        print 'No cloudsat data will be used for this orbit'
+        return None, None, None
+        
     return geovcm, geoalt, geotime
     
 
