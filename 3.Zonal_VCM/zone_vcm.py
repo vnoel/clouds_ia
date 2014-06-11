@@ -67,8 +67,7 @@ def zone_vcm_from_vcm_orbit(vcm_orbit, latbins=latbins):
         
         if 'nprof' not in out:
             out['nprof'] = da.DimArray(nprof, labels=[latbins], dims=['lat'])
-        out[vcm_name] = da.DimArray(zone_vcm, labels=[latbins, altitude], dims=['lat', 'altitude'])
-        out[vcm_name].longname = 'Number of cloudy points in lat-z bin, considering ' + vcm_name
+        out[vcm_name] = da.DimArray(zone_vcm, labels=[latbins, altitude], dims=['lat', 'altitude'], longname='Number of cloudy points in lat-z bin, considering ' + vcm_name)
         out[vcm_name + '_cprof'] = da.DimArray(cprof, labels=[latbins], dims=['lat'])
     
     return out
@@ -92,6 +91,8 @@ def zone_vcm_file_from_vcm_orbits(vcm_orbits, outname, where='./out'):
         
     if dataset is None:
         return
+        
+    dataset.author = 'Vincent Noel, LMD/CNRS'
         
     if not os.path.isdir(where):
         print 'Creating dir ' + where
