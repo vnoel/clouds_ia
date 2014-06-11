@@ -67,7 +67,7 @@ def remap_profiles(values, n1, n2, nprof333):
     return out
 
 
-def combine_vcms(vcm, vcm5, vcmc):
+def reindex_vcms(vcm, vcm5, vcmc):
     
     # vcmc can be None
     
@@ -136,7 +136,7 @@ def vcm_dataset_from_l2_orbits(cal333, cal5, csat, slow=False):
     vcmc = orbit_vcm_csat.vcm_from_geoprof_file(csat, vcm['cal333'].labels[1])
     # here vcmc can be None if there is no file
     
-    vcm = combine_vcms(vcm, vcm5, vcmc)
+    vcm = reindex_vcms(vcm, vcm5, vcmc)
 
     return vcm
     
