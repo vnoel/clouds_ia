@@ -125,6 +125,11 @@ def vcm_dataset_from_l2_orbits(cal333, cal5, csat, slow=False):
         print 'csat file : ', csat
         return None
     
+    print 'Creating vcm from'
+    print cal333
+    print cal5
+    print csat
+    
     vcm = orbit_vcm_cal333.vcm_dataset_from_l2_orbit(cal333)
     vcm5 = orbit_vcm_cal5.vcm_dataset_from_l2_orbit(cal5)
 
@@ -137,6 +142,7 @@ def vcm_dataset_from_l2_orbits(cal333, cal5, csat, slow=False):
     # here vcmc can be None if there is no file
     
     vcm = reindex_vcms(vcm, vcm5, vcmc)
+    vcm.input_files = ','.join([cal333, cal5, csat])
 
     return vcm
     
