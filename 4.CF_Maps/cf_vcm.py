@@ -9,7 +9,7 @@ import dimarray as da
 vcm_names = 'csat', 'cal333', 'cal333+cal05', 'cal333+cal05+cal20', 'cal333+cal05+cal20+cal80+csat'
 
 
-def combine_vcms(origin, target_name):
+def combine_vcms(origin, target_name, output_so_far=None):
     
     if '+' not in target_name:
         output = origin[target_name]
@@ -19,11 +19,21 @@ def combine_vcms(origin, target_name):
             print 'Warning : some vcms are not present in file. Contained data :'
             print data
             return None        
+            
+        # check if we are not simply adding a vcm to a sum already present
+        if output_so_far is not None:
+            previous_step = '+'.join(names[:-1])
+            if previous_step in output_so_far:
+                print previous_step + ' already cached'
+                output = output_so_far[previous_step].values + origin[names[-1]]
+                return output
+
         output = origin[names[0]]
         for name in names[1:]:
             output += origin[name]
         # FIXME : need to check cloudsat data here
         np.clip(output, -1, 1, out=output.values)
+
     return output
 
 
