@@ -34,8 +34,8 @@ def cf_zonal(filename):
     
     data = da.read_nc(filename)
     try:
-        vcm_prof = data['vcm_csat+cal333-80']
-        nprof = data['vcm_csat+cal333-80_cprof']
+        vcm_prof = data['cal333+cal05+cal20+cal80+csat']
+        nprof = data['cal333+cal05+cal20+cal80+csat_cprof']
     except KeyError:
         return None, None, None
         

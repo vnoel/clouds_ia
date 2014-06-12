@@ -74,8 +74,8 @@ def aggregate_arrays_from_files(files, array_name, summed_along=None):
 
 def show_files(files, title):
     
-    vcm_prof = aggregate_arrays_from_files(files, 'vcm_csat+cal333-80')
-    nprof = aggregate_arrays_from_files(files, 'vcm_csat+cal333-80_cprof')
+    vcm_prof = aggregate_arrays_from_files(files, 'cal333+cal05+cal20+cal80+csat')
+    nprof = aggregate_arrays_from_files(files, 'cal333+cal05+cal20+cal80+csat_cprof')
     
     cf_lat = vcm_prof.values.T / nprof.values
     cf_lat = cf_lat.T
