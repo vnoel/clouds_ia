@@ -18,9 +18,9 @@ def grid_vcm_from_vcm_orbit(vcm_orbit, lstep=2.):
     data = da.read_nc(vcm_orbit)
     plon = data['lon'].values
     plat = data['lat'].values
-    
-    if 'vcm_csat+cal333-5' not in data or 'vcm_csat+cal333-20' not in data or 'vcm_csat+cal333-80' not in data:
-        print 'Warning : some vcms are not present in file. Contained data :'
+
+    if not all(key in data for key in ['csat', 'cal333', 'cal05', 'cal20', 'cal80']):
+        print 'Warning : all required vcms are not in file. Contained data :'
         print data
         return None
     

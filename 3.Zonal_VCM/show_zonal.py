@@ -30,6 +30,7 @@ def aggregate_arrays_from_files(files, array_name, summed_along=None):
 
         data = da.read_nc(f)
         if array_name not in data:
+            print array_name + 'is not in ' + data
             continue
         array = data[array_name]
 
@@ -49,8 +50,8 @@ def aggregate_arrays_from_files(files, array_name, summed_along=None):
 
 def show_files(files, title):
     
-    vcm_prof = aggregate_arrays_from_files(files, 'vcm_csat+cal333-80')
-    nprof = aggregate_arrays_from_files(files, 'vcm_csat+cal333-80_cprof')
+    vcm_prof = aggregate_arrays_from_files(files, 'cal333+cal05+cal20+cal80+csat')
+    nprof = aggregate_arrays_from_files(files, 'nprof')
     
     cf_lat = vcm_prof.values.T / nprof.values
     cf_lat = cf_lat.T
@@ -59,12 +60,16 @@ def show_files(files, title):
     pcolor_ctop(vcm_prof.labels[0], vcm_prof.labels[1], cf_lat, 'Cloud fraction ' + title)
 
 
-def main(vcm_grid_file='./out/200707/ctop_2007-07-01.nc4'):
+def main(vcm_grid_file=None):
     
     import glob
     
-    mask = 'out/200701/vcm_grid_*.nc4'
-    grid_files = glob.glob(mask)
+    if vcm_grid_file is None:
+        mask = 'out/200701/vcm_zonal_*.nc4'
+        grid_files = glob.glob(mask)
+    else:
+        grid_files = [vcm_grid_files]
+    assert len(grid_files) > 0
     # mask = 'out/200707/vcm_grid_*.nc4'
     # grid_files += glob.glob(mask)
     # mask = 'out/200708/vcm_grid_*.nc4'
