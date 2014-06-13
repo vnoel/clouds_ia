@@ -17,8 +17,8 @@ def month_tropic_width(monthfile):
     except:
         return None
     try:
-        vcm = 1. * data['vcm_csat+cal333-80']
-        nprof = 1. * data['vcm_csat+cal333-80_cprof']
+        vcm = 1. * data['cal333+cal05+cal20+cal80+csat']
+        nprof = 1. * data['cal333+cal05+cal20+cal80+csat_cprof']
     except KeyError:
         return None
         
@@ -56,7 +56,7 @@ def scan_years(years, where='./out/'):
             
             print datetimes[-1], tropic_min[-1], tropic_max[-1]
 
-    np.savez('tropic_width.npz', tmin=tropic_min, tmax=tropic_max, datetimes=datetimes)
+    np.savez('out/tropic_width.npz', tmin=tropic_min, tmax=tropic_max, datetimes=datetimes)
 
 def main():
     

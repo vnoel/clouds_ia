@@ -6,7 +6,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def main(infile='tropic_width.npz'):
+def main(infile='out/tropic_width.npz'):
     npz = np.load(infile)
     tmin, tmax, time = npz['tmin'], npz['tmax'], npz['datetimes']
     
