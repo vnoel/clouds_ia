@@ -19,15 +19,11 @@ def pcolor_zonal(x, y, vcmarray, title=None):
     plt.clim(0,0.8)
     plt.xlim(-82,82)
     plt.xticks(np.r_[-90:90+30:30])
-    # plt.axhline(y=16, ls='--', color='w')
-    # latrange = tropic_width(x, y, vcmarray)
-    # plt.axvline(x=latrange[0], ls='--', color='w')
-    # plt.axvline(x=latrange[1], ls='--', color='w')
-    latup, latdown = tropic_width.tropic_width3(x, y, vcmarray)
+    latup, latdown, ceiling, height = tropic_width.tropic_width3(x, y, vcmarray)
     plt.axvline(x=latup, ls='--', color='w')
     plt.axvline(x=latdown, ls='--', color='w')
-    # print 'lat range : ', latrange
-    # print 'lat width : ', latrange[1]-latrange[0]
+    plt.axhline(y=ceiling, ls='--')
+    plt.axhline(y=height, ls='--')
 
 
 def cf_zonal(filename):
