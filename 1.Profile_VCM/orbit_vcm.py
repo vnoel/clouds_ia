@@ -142,7 +142,12 @@ def vcm_dataset_from_l2_orbits(cal333, cal5, csat, slow=False):
     # here vcmc can be None if there is no file
     
     vcm = reindex_vcms(vcm, vcm5, vcmc)
-    vcm.input_files = ','.join([cal333, cal5, csat])
+    if csat is None:
+        input_files = ','.join([os.path.basename(cal333), os.path.basename(cal5)])
+    else:
+        input_files = ','.join([os.path.basename(cal333), os.path.basename(cal5), os.path.basename(csat)])
+
+    vcm.input_files = input_files
 
     return vcm
     
