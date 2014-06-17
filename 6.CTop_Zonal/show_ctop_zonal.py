@@ -63,7 +63,7 @@ def main(mask=None):
     import glob
     
     if mask is None:
-        mask = 'out/200701/*.nc4'
+        mask = './test.out/200701/*.nc4'
 
     grid_files = glob.glob(mask)
     grid_files.sort()
