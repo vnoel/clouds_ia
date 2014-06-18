@@ -5,7 +5,6 @@
 
 import numpy as np
 import dimarray as da
-import matplotlib.pyplot as plt
 
 
 def dayfiles_sum_dataset(files):
