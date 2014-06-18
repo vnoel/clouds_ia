@@ -27,7 +27,9 @@ def dayfiles_sum_dataset(files):
 
 def main(year=2006):
     
-    import glob
+    import glob, os
+    
+    year = int(year)
     
     months = range(13)
     for month in months:
@@ -37,7 +39,10 @@ def main(year=2006):
             print(path + ': No dailies, skipping')
             continue
         print (path + ': {} files'.format(len(files)))
-        outfile = 'out/ctop_zonal_{:04d}{:02d}.nc4'.format(year, month)
+        outpath = 'out/{:04d}'.format(year)
+        if not os.path.isdir(outpath):
+            os.mkdir(outpath)
+        outfile = outpath + '/ctop_zonal_{:04d}{:02d}.nc4'.format(year, month)
         
         month_sum = dayfiles_sum_dataset(files)
         month_sum.write_nc(outfile, 'w')
