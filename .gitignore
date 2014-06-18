@@ -4,6 +4,7 @@ __pycache__
 *.pyc
 out
 */in
+in_width
 *.e*
 *.o*
 .fuse*
