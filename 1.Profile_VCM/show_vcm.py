@@ -12,23 +12,28 @@ def plot_vcm(vcm,field):
     plt.pcolormesh(va.labels[0][3000:5000], va.labels[1], va.values[3000:5000,:].T, cmap=plt.cm.gray_r)
     plt.title(field)
     plt.savefig('test.png')
-    plt.show()
+
     
 def plot_vcms(vcm):
     
     i = 1
+    print vcm
+    
     for field in vcm:
-        if field.startswith('vcm'):
+        print field
+        if field.startswith('cal') or field.startswith('csat'):
+            print 'plotting'
             plt.subplot(3, 2, i)
             plot_vcm(vcm, field)
             i += 1
-    plt.show()
+            
 
 def main(input='test.out/200801/vcm_2008-01-01T01-30-23ZN.nc4'):
     
     fig = plt.figure(figsize=[12,12])
     vcm = da.read_nc(input)
-    plot_vcm(vcm, 'vcm_csat+cal333-5')
+    plot_vcms(vcm)
+    plt.show()
 
 
 if __name__ == '__main__':
