@@ -8,7 +8,10 @@ from cf_vcm import cf_file_from_vcm_orbits
 import glob
 import os
 
-def process_vcm_orbits_period(start, end, where):
+layers = {'total':[0, 22.5], 'low':[0, 2.75], 'mid':[2.75, 7], 'high':[7, 22.5]}
+
+
+def process_vcm_orbits_period(start, end, where, altrange):
 
     if not os.path.isdir(where):
         print 'Creating dir ' + where
@@ -25,14 +28,14 @@ def process_vcm_orbits_period(start, end, where):
             continue
         
         outpath = where + '%04d%02d/' % (current.year, current.month)
-        outname = 'cf_%04d-%02d-%02d.nc4' % (current.year, current.month, current.day)
+        outname = 'cf_%s_%04d-%02d-%02d.nc4' % (altrange, current.year, current.month, current.day)
         
-        cf_file_from_vcm_orbits(vcm_files, outname, where=outpath)
+        cf_file_from_vcm_orbits(vcm_files, layers[altrange], outname, where=outpath)
         
         current += timedelta(days=1)
 
 
-def main(year=2007, month=None, day=None, where='out/'):
+def main(altrange, year=2007, month=None, day=None, where='out/'):
 
     if day is not None and month is not None:
         year, month, day = int(year), int(month), int(day)
@@ -47,16 +50,15 @@ def main(year=2007, month=None, day=None, where='out/'):
         start = datetime(year, 1, 1)
         end = datetime(year, 12, 31)
 
-    process_vcm_orbits_period(start, end, where)
+    process_vcm_orbits_period(start, end, where, altrange)
 
 
 def test_day_grid_for_orbits():
     
     import os
     
-    orbit_files = glob.glob('in/200801/vcm_2008-01-01*.nc4')
-    main(2008,1,1,where='test.out/')
-    assert os.path.isfile('test.out/200801/vcm_grid_2008-01-01.nc4')
+    main('total',2008,1,1,where='test.out/')
+    assert os.path.isfile('test.out/200801/cf_total_2008-01-01.nc4')
         
 
 if __name__=='__main__':
