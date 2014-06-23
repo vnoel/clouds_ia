@@ -17,9 +17,9 @@ def tropic_width(lat, alt, vcm, height=16.):
     return latrange
  
     
-def tropic_width3(lat, alt, vcm):
+def tropic_width3(lat, alt, vcm, vcm_min=0.05):
     
-    cover_top = cloud_cover_top(alt, vcm)
+    cover_top = cloud_cover_top(alt, vcm, vcm_min=0.05)
     idx = (lat > -30) & (lat < 30)
     
     # sorted cover tops between + and - 30 degrees
@@ -32,9 +32,17 @@ def tropic_width3(lat, alt, vcm):
     print('Tropic ceiling = {} km'.format(trop_ceiling))
     print('Cutting tropic hat at {} km'.format(height))
 
-    idx = (cover_top > height) & (lat > -40) & (lat < 40)
+    cover_top2 = cloud_cover_top(alt, vcm, vcm_min=vcm_min)
+    idx = (cover_top2 > height) & (lat > -40) & (lat < 40)
     
-    return np.min(lat[idx]), np.max(lat[idx]), trop_ceiling, height
+    if np.sum(idx) == 0:
+        tropmin = -1
+        tropmax = -1
+    else:
+        tropmin = np.min(lat[idx])
+        tropmax = np.max(lat[idx])
+    
+    return tropmin, tropmax, trop_ceiling, height
     
     
 def tropic_width2(lat, alt, vcm):
@@ -56,14 +64,14 @@ def tropic_width2(lat, alt, vcm):
     return latup, latdown
     
     
-def cloud_cover_top(alt, vcm):
+def cloud_cover_top(alt, vcm, vcm_min=0.05):
     
     nlat = vcm.shape[0]
     cloud_top = np.zeros(nlat)
     
     for ilat in np.arange(nlat):
         vcmslice = vcm[ilat,:]
-        idx = (vcmslice > 0.05) & (alt < 19)
+        idx = (vcmslice > vcm_min) & (alt < 19)
         try:
             cloud_top[ilat] = np.max(alt[idx])
         except ValueError:
