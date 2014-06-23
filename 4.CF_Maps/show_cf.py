@@ -8,6 +8,9 @@ import dimarray as da
 import matplotlib.pyplot as plt
 
 
+vcm_name = 'cal333+cal05+cal20+cal80+csat'
+
+
 def pcolor_cf(x, y, vcmarray, title=None):
 
     from mpl_toolkits.basemap import Basemap
@@ -23,9 +26,9 @@ def pcolor_cf(x, y, vcmarray, title=None):
         plt.title(title)
 
 
-def aggregate_arrays_from_files(files, array_name, summed_along=None):
+def aggregate_arrays_from_files(files, array_names, summed_along=None):
     
-    aggregated = None
+    aggregated = dict()
 
     files.sort()
     prevmax = 0
@@ -33,28 +36,31 @@ def aggregate_arrays_from_files(files, array_name, summed_along=None):
     for f in files:
 
         data = da.read_nc(f)
-        if array_name not in data:
+        if any(array_name not in data for array_name in array_names):
+            print 'Missing data'
             continue
-        array = data[array_name]
+        for array_name in array_names:
 
-        if summed_along is not None:
-            array = array.sum(axis=summed_along)            
-        if aggregated is None:
-            aggregated = 1. * array
-        else:
-            aggregated += array
+            array = data[array_name]
+
+            if summed_along is not None:
+                array = array.sum(axis=summed_along)            
+            if array_name not in aggregated:
+                aggregated[array_name] = 1. * array
+            else:
+                aggregated[array_name] += array
         
-        if aggregated.max() < prevmax:
-            print 'PROBLEME !'
-            print 'Previous maximum = ', prevmax, ', current max = ', aggregated.max()
+            if aggregated[array_name].max() < prevmax:
+                print 'PROBLEME !'
+                print 'Previous maximum = ', prevmax, ', current max = ', aggregated[array_name].max()
 
-    return aggregated
+    data = [aggregated[array_name] for array_name in array_names]
+    return data
 
 
 def show_files(files, title):
     
-    cprof = aggregate_arrays_from_files(files, 'csat_cprof')
-    nprof = aggregate_arrays_from_files(files, 'nprof')
+    cprof, nprof = aggregate_arrays_from_files(files, [vcm_name + '_cprof', 'nprof'])
     
     cloudypoints = np.ma.masked_where(nprof.values==0, 1. * cprof.values / nprof.values)
     cloudypoints = np.ma.masked_invalid(cloudypoints)
