@@ -25,13 +25,17 @@ def dayfiles_sum_dataset(files):
     return aggregated
 
 
-def main(year=2006):
+def main(year=2006, months=None):
     
     import glob, os
     
     year = int(year)
     
-    months = range(13)
+    if months is None:
+        months = range(13)
+    else:
+        months = [int(months)]
+        
     for month in months:
         path = 'out/{}{:02d}/ctop_zonal*.nc4'.format(year, month)
         files = glob.glob(path)

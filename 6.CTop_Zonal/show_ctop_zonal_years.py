@@ -12,14 +12,16 @@ def plot_ctop(ctop_avg):
     
     plt.figure(figsize=[15,5])
     for year in ctop_avg:
-        plt.plot(ctop_avg.labels[0], ctop_avg, label=year)
+        plt.plot(ctop_avg[year].labels[0], ctop_avg[year], label=year)
     plt.xlabel('Latitude')
     plt.ylabel('Average Cloud Top')
     
-
-def aggregate_arrays_from_files(files, array_name, summed_along=None):
+    plt.legend()
     
-    aggregated = None
+
+def aggregate_arrays_from_files(files, array_names):
+    
+    aggregated = dict()
 
     files.sort()
     prevmax = 0
@@ -27,31 +29,33 @@ def aggregate_arrays_from_files(files, array_name, summed_along=None):
     for f in files:
 
         data = da.read_nc(f)
-        if array_name not in data:
+        if any(array_name not in data for array_name in array_names):
             continue
-        array = data[array_name]
+            
+        for array_name in array_names:
 
-        if summed_along is not None:
-            array = array.sum(axis=summed_along)            
-        if aggregated is None:
-            aggregated = 1. * array
-        else:
-            aggregated += array
+            array = data[array_name]
+
+            if array_name not in aggregated:
+                aggregated[array_name] = 1. * array
+            else:
+                aggregated[array_name] += array
         
-        if aggregated.max() < prevmax:
-            print 'PROBLEME !'
-            print 'Previous maximum = ', prevmax, ', current max = ', aggregated.max()
+            if aggregated[array_name].max() < prevmax:
+                print 'PROBLEME !'
+                print 'Previous maximum = ', prevmax, ', current max = ', aggregated[array_name].max()
 
-    return aggregated
+    data = [aggregated[key] for key in array_names]
+
+    return data
 
 
 def ctop_avg_for_files(files):
     
-    ctopsum = aggregate_arrays_from_files(files, 'cal333+cal05+cal20+cal80+csat_ctopsum')
-    nclouds = aggregate_arrays_from_files(files, 'cal333+cal05+cal20+cal80+csat_nclouds')
-    
+    ctopsum, nclouds = aggregate_arrays_from_files(files, ['cal333+cal05+cal20+cal80+csat_ctopsum', 'cal333+cal05+cal20+cal80+csat_nclouds'])    
     ctop = np.ma.masked_where(nclouds.values==0, 1. * ctopsum.values / nclouds.values)
     ctop = np.ma.masked_invalid(ctop)
+    ctop = da.DimArray(ctop, labels=ctopsum.labels, dims=ctopsum.dims)
     
     return ctop
     
