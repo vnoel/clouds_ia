@@ -10,7 +10,7 @@ import os
 
 altmin = [7, 10, 13]
 
-def process_vcm_orbits_period(start, end, where, altrange):
+def process_vcm_orbits_period(start, end, where):
 
     if not os.path.isdir(where):
         print 'Creating dir ' + where
@@ -22,6 +22,7 @@ def process_vcm_orbits_period(start, end, where, altrange):
         inpath = './in/%04d%02d/' % (current.year, current.month)
         mask = 'vcm_%04d-%02d-%02d*.nc4' % (current.year, current.month, current.day)
         vcm_files = glob.glob(inpath + mask)
+        print inpath + mask + ' %d files' % len(vcm_files)
         if len(vcm_files) < 1:
             current += timedelta(days=1)
             continue
@@ -34,7 +35,7 @@ def process_vcm_orbits_period(start, end, where, altrange):
         current += timedelta(days=1)
 
 
-def main(altrange, year=2007, month=None, day=None, where='out/'):
+def main(year=2007, month=None, day=None, where='out/'):
 
     if day is not None and month is not None:
         year, month, day = int(year), int(month), int(day)
@@ -49,7 +50,7 @@ def main(altrange, year=2007, month=None, day=None, where='out/'):
         start = datetime(year, 1, 1)
         end = datetime(year, 12, 31)
 
-    process_vcm_orbits_period(start, end, where, altrange)
+    process_vcm_orbits_period(start, end, where)
 
 
 def test_day_grid_for_orbits():

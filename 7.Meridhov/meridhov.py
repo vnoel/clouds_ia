@@ -29,6 +29,8 @@ def cflon(f, altmin):
         cv = v.get_vcm(n)
         assert cv is not None
         
+        outdict = dict()
+        
         for a in altmin:
             
             idx = (v.altitude >= a) & (v.altitude < 22.5)
@@ -37,9 +39,11 @@ def cflon(f, altmin):
             np.clip(cloudy, 0, 1, out=cloudy)
             
             h, xx = np.histogram(v.lon.values, bins=lonbins, weights=cloudy)
-            outname = n + '_cprof'
-            out[outname] = da.DimArray(h, labels=[lonbins[:-1]], dims=['lon',])
-            out[outname].longname = 'Number of cloudy profiles from cloud mask = ' + n
+            outdict[a] = da.DimArray(h, labels=[lonbins[:-1]], dims=['lon',])
+        
+        outname = n + '_cprof'
+        out[outname] = da.stack(outdict, axis='altmin')
+        out[outname].longname = 'Number of cloudy profiles from cloud mask = ' + n
     
     return out
 
