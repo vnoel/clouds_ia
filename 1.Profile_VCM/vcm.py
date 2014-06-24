@@ -4,13 +4,14 @@
 # Created by V. Noel [LMD/CNRS] on 2014-06-24
 
 import dimarray as da
+import numpy as np
 
 
 class VCM(object):
     
     def __init__(self, filename):
     
-        self.data = da.read_nc(vcm_orbit)
+        self.data = da.read_nc(filename)
         self.lon = self.data['lon']
         self.lat = self.data['lat']
         
@@ -21,18 +22,18 @@ class VCM(object):
         
         # mask = 'cal333+cal05+cal20+cal80+csat' for instance
         
-        if '+' not in target_name:
-            output = origin[target_name]
+        if '+' not in mask:
+            output = self.data[mask]
         else:
-            names = target_name.split('+')
+            names = mask.split('+')
             if not all(name in self.data for name in names):
                 print 'Warning : some requested vcms are not present in file. Contained data :'
                 print self.data
                 return None        
         
-            output = origin[names[0]].values
+            output = self.data[names[0]].values
             for name in names[1:]:
-                output += origin[name].values
+                output += self.data[name].values
 
             np.clip(output, 0, 1, out=output)
 
