@@ -12,7 +12,7 @@ lstep = 1.
 lonbins = np.r_[-180:180+lstep:lstep]
 
 
-def cflon(f, altmin):
+def cflon(f, altmin, latbounds):
 
     # altmin is an array
     
@@ -20,7 +20,7 @@ def cflon(f, altmin):
     out = da.Dataset()
 
     # number of profiles per lon bin
-    h, xx = np.histogram(v.lon.values, bins=lonbins)
+    h, xx = np.histogram(v.lon, bins=lonbins)
     out['nprof'] = da.DimArray(h, labels=[lonbins[:-1]], dims=['lon',])
     out['nprof'].longname = 'Number of measured profiles'
     
@@ -28,6 +28,10 @@ def cflon(f, altmin):
         
         cv = v.get_vcm(n)
         assert cv is not None
+        
+        # clip latitudes
+        latidx = (v.lat >= latbounds[0]) & (v.lat < latbounds[1])
+        cv = cv[latidx,:]
         
         outdict = dict()
         
@@ -38,7 +42,7 @@ def cflon(f, altmin):
             cloudy = np.sum(cvslice, axis=1)
             np.clip(cloudy, 0, 1, out=cloudy)
             
-            h, xx = np.histogram(v.lon.values, bins=lonbins, weights=cloudy)
+            h, xx = np.histogram(v.lon[latidx], bins=lonbins, weights=cloudy)
             outdict[a] = da.DimArray(h, labels=[lonbins[:-1]], dims=['lon',])
         
         outname = n + '_cprof'
@@ -48,13 +52,13 @@ def cflon(f, altmin):
     return out
 
 
-def cflon_files(files, altmin, outname, where):
+def cflon_files(files, altmin, latbounds, outname, where):
     
     import os
     
     dataset = None
     for f in files:
-        out = cflon(f, altmin)
+        out = cflon(f, altmin, latbounds)
         if out is None:
             return
         if dataset is None:
