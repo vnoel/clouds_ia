@@ -9,47 +9,18 @@ import dimarray as da
 vcm_names = ['cal333+cal05+cal20+cal80+csat']
 
 
-def combine_vcms(origin, target_name, output_so_far=None):
-    
-    if '+' not in target_name:
-        output = origin[target_name]
-    else:
-        names = target_name.split('+')
-        if not all(name in origin for name in names):
-            print 'Warning : some vcms are not present in file. Contained data :'
-            print origin
-            return None        
-            
-        # check if we are not simply adding a vcm to a sum already present
-        if output_so_far is not None:
-            previous_step = '+'.join(names[:-1])
-            if previous_step in output_so_far:
-                print previous_step + ' already cached'
-                output = output_so_far[previous_step].values + origin[names[-1]]
-                return output
-
-        output = origin[names[0]].values
-        for name in names[1:]:
-            output += origin[name].values
-        # FIXME : need to check cloudsat data here
-        np.clip(output, -1, 1, out=output)
-
-    return output
-
-
 def cf_from_vcm_orbit(vcm_orbit, altrange, lstep=2.):
     
-    # create vcm_3d grid
+    # create grid
     lonbins = np.r_[-180:180+lstep:lstep]
     latbins = np.r_[-90:90+lstep:lstep]
-    nlon, nlat = lonbins.shape[0]-1, latbins.shape[0]-1
     
     # read data
-    data = da.read_nc(vcm_orbit)
-    plon = data['lon'].values.astype('float32')
-    plat = data['lat'].values.astype('float32')
+    v = vcm.VCM(vcm_orbit)
+    plon = v.lon.values
+    plat = v.lat.values
         
-    altitude = data['cal333'].labels[1]
+    altitude = v.altitude
     altidx = (altitude >= altrange[0]) & (altitude < altrange[1])
     
     out = da.Dataset()
@@ -63,11 +34,10 @@ def cf_from_vcm_orbit(vcm_orbit, altrange, lstep=2.):
         
         # number of cloudy profiles in grid and altitude range
 
-        this_vcm = combine_vcms(data, vcm_name)
+        this_vcm = v.get_vcm(vcm_name)
         assert this_vcm is not None
         
-        vcm_slice = this_vcm[:, altidx]
-        cloudy_profile = np.sum(vcm_slice, axis=1)
+        cloudy_profile = np.sum(this_vcm[:,altidx], axis=1)
         np.clip(cloudy_profile, 0, 1, out=cloudy_profile)
         
         h, xx, yy = np.histogram2d(plon, plat, bins=(lonbins, latbins), weights=cloudy_profile)
