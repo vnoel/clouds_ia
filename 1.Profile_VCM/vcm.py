@@ -12,8 +12,8 @@ class VCM(object):
     def __init__(self, filename):
     
         self.data = da.read_nc(filename)
-        self.lon = self.data['lon']
-        self.lat = self.data['lat']
+        self.lon = self.data['lon'].values
+        self.lat = self.data['lat'].values
         
         self.altitude = self.data['cal333'].labels[1]
         
@@ -39,4 +39,17 @@ class VCM(object):
 
         return output
 
+
+def aggregate_arrays_from_files(filemask, array_names, summed_along=None):
     
+    aggregated = dict()
+    
+    for name in array_names:
+        data = da.read_nc(filemask, name, axis='orbit')
+        if summed_along:
+            data = data.sum(axis=summed_along)
+        aggregated[name] = data.sum(axis='orbit')
+    
+    data = [aggregated[array_name] for array_name in array_names]
+    
+    return data
