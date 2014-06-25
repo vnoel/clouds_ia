@@ -14,8 +14,7 @@ class VCM(object):
         self.data = da.read_nc(filename)
         self.lon = self.data['lon'].values
         self.lat = self.data['lat'].values
-        
-        self.altitude = self.data['cal333'].labels[1]
+        self.altitude = self.data['cal333'].altitude
         
     
     def get_vcm(self, mask):
@@ -30,12 +29,14 @@ class VCM(object):
                 print 'Warning : some requested vcms are not present in file. Contained data :'
                 print self.data
                 return None        
-        
+
+            # this is waaaay slower
+            # output = np.sum([self.data[name].values for name in names], axis=0)
+
             output = self.data[names[0]].values
             for name in names[1:]:
                 output += self.data[name].values
-
-            np.clip(output, 0, 1, out=output)
+            output = np.clip(output, 0, 1)
 
         return output
 
