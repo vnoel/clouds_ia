@@ -29,15 +29,15 @@ def tropic_width3(lat, alt, vcm, vcm_min=0.05):
     trop_ceiling = np.mean(sorted_tops[-100:])
     height = trop_ceiling - 2.
     
-    print('Tropic ceiling = {} km'.format(trop_ceiling))
-    print('Cutting tropic hat at {} km'.format(height))
+    # print('Tropic ceiling = {} km'.format(trop_ceiling))
+    # print('Cutting tropic hat at {} km'.format(height))
 
     cover_top2 = cloud_cover_top(alt, vcm, vcm_min=vcm_min)
     idx = (cover_top2 > height) & (lat > -40) & (lat < 40)
     
     if np.sum(idx) == 0:
-        tropmin = -1
-        tropmax = -1
+        tropmin = -999
+        tropmax = -999
     else:
         tropmin = np.min(lat[idx])
         tropmax = np.max(lat[idx])
@@ -66,15 +66,8 @@ def tropic_width2(lat, alt, vcm):
     
 def cloud_cover_top(alt, vcm, vcm_min=0.05):
     
-    nlat = vcm.shape[0]
-    cloud_top = np.zeros(nlat)
+    altclouds = (vcm > vcm_min) * alt    
+    cloud_top = np.max(altclouds, axis=1)
+    cloud_top = cloud_top.filled(-1.)
     
-    for ilat in np.arange(nlat):
-        vcmslice = vcm[ilat,:]
-        idx = (vcmslice > vcm_min) & (alt < 19)
-        try:
-            cloud_top[ilat] = np.max(alt[idx])
-        except ValueError:
-            cloud_top[ilat] = -1
-            
     return cloud_top

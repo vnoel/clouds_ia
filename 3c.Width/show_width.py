@@ -9,20 +9,23 @@ import matplotlib.pyplot as plt
 vcm_mins = [0.05, 0.15, 0.25, 0.35]
 colors = {0.05:'k', 0.15:'r', 0.25:'b', 0.35:'gray'}
 
-def main(infile='out/tropic_width.npz'):
+def main(infile='tropic_width_40.npz'):
     npz = np.load(infile)
     tmin, tmax, time = npz['tmin'], npz['tmax'], npz['datetimes']
     
+    print time
+    
     tmin = np.array(tmin).item()
     tmax = np.array(tmax).item()
+    
     
     plt.figure(figsize=[15,10])
     plt.subplot(2,1,1)
     for vcm_min in vcm_mins:
         this_tmin = np.array(tmin[vcm_min])
-        this_tmin = np.ma.masked_where(this_tmin == -1, this_tmin)
+        this_tmin = np.ma.masked_where(this_tmin < -90, this_tmin)
         this_tmax = np.array(tmax[vcm_min])
-        this_tmax = np.ma.masked_where(this_tmax == -1, this_tmax)
+        this_tmax = np.ma.masked_where(this_tmax < -90, this_tmax)
         plt.plot(time, this_tmin, colors[vcm_min])
         plt.plot(time, this_tmax, colors[vcm_min])
     plt.ylabel('Latitude')
@@ -32,9 +35,9 @@ def main(infile='out/tropic_width.npz'):
     plt.subplot(2,1,2)
     for vcm_min in vcm_mins:
         this_tmin = np.array(tmin[vcm_min])
-        this_tmin = np.ma.masked_where(this_tmin == -1, this_tmin)
+        this_tmin = np.ma.masked_where(this_tmin < -90, this_tmin)
         this_tmax = np.array(tmax[vcm_min])
-        this_tmax = np.ma.masked_where(this_tmax == -1, this_tmax)
+        this_tmax = np.ma.masked_where(this_tmax < -90, this_tmax)
         plt.plot(time, this_tmax - this_tmin, colors[vcm_min])
     plt.ylabel('Tropics meridional height')
     plt.grid()
