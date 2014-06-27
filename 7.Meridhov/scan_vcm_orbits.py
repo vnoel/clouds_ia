@@ -7,9 +7,25 @@ from datetime import datetime, timedelta
 import meridhov
 import glob
 import os
+import numpy as np
 
 altmin = [7, 10, 13]
-latbounds = [-30, 30]
+w = np.load('tropic_width_40.npz')
+wdt = w['datetimes']
+tmin = np.array(w['tmin']).item()[0.05]
+tmax = np.array(w['tmax']).item()[0.05]
+
+
+def tropic_width(dt):
+    # return the tropic cell width closest to the requested date 
+    # at least 15 days apart
+    delta = np.array([(dt - this).days for this in wdt])
+    i = np.argmin(np.abs(delta))
+    if delta[i] > 7:
+        return None
+    else:
+        return tmin[i], tmax[i]
+    
 
 def process_vcm_orbits_period(start, end, where):
 
@@ -27,9 +43,14 @@ def process_vcm_orbits_period(start, end, where):
         if len(vcm_files) < 1:
             current += timedelta(days=1)
             continue
+
+        latbounds = tropic_width(current)
+        if latbounds is None:
+            latbounds = [-30, 30]
         
         outpath = where + '%04d%02d/' % (current.year, current.month)
         outname = 'cflon_%04d-%02d-%02d.nc4' % (current.year, current.month, current.day)
+        
         
         meridhov.cflon_files(vcm_files, altmin, latbounds, outname, where=outpath)
         

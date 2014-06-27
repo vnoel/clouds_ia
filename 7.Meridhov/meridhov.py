@@ -37,9 +37,8 @@ def cflon(f, altmin, latbounds):
         
         for a in altmin:
             
-            idx = (v.altitude >= a) & (v.altitude < 22.5)
-            cvslice = cv[:,idx]
-            cloudy = np.sum(cvslice, axis=1)
+            idx = (v.altitude >= a) 
+            cloudy = np.sum(cv[:,idx], axis=1)
             np.clip(cloudy, 0, 1, out=cloudy)
             
             h, xx = np.histogram(v.lon[latidx], bins=lonbins, weights=cloudy)

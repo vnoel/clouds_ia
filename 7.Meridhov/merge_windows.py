@@ -26,6 +26,7 @@ def main(window):
     fullnprof = []
     for year in years:
         mask = 'out.{:02d}/{:04d}/*.nc4'.format(window, year)
+        print mask
         try:
             vcm = da.read_nc(mask, vcm_name, axis='file')
         except ValueError:
