@@ -33,9 +33,15 @@ class VCM(object):
             # this is waaaay slower
             # output = np.sum([self.data[name].values for name in names], axis=0)
 
-            output = self.data[names[0]].values
+            # need to clip this between 0,1
+            # missing data in a vcm is flagged with -1
+
+            # this can happen e.g. for csat when there are no files.
+            # it does *not* happen when the are no colocated profile, as far as I know.
+            # need to do sthing better than that ?
+            output = np.clip(self.data[names[0]].values, 0, 1)
             for name in names[1:]:
-                output += self.data[name].values
+                output += np.clip(self.data[name].values, 0, 1)
             output = np.clip(output, 0, 1)
 
         return output
