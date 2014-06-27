@@ -3,7 +3,7 @@
 
 # Created by VNoel on 2014-06-25
 
-import datetime
+from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.dates import date2num
@@ -20,16 +20,16 @@ def pcolor_meridhov(time, lon, cf, title, anom=False):
         plt.pcolormesh(lon, time, cf, cmap='RdBu_r')
         plt.clim(-0.1,0.1)
     else:
-        plt.pcolormesh(lon, time, cf)
+        plt.contourf(lon, time, cf)
     ax.yaxis.axis_date()
         
     plt.colorbar()
     plt.xlim(-180, 180)
     plt.title(title)
 
-def main(input='monthlies.npz'):
+def main(infile='series_40.npz'):
     
-    npz = np.load(input)
+    npz = np.load(infile)
     nprof = npz['nprof']
     vcm = npz['vcm']
     time = npz['time']
@@ -40,40 +40,41 @@ def main(input='monthlies.npz'):
     # now vcm[altmin,time,lon]
     
     # average year
-    vcm_avg = dict()
-    for ialtmin in 0, 1, 2:
-        vcm_avg[ialtmin] = np.zeros([13, vcm.shape[2]])
-    nprof_avg = np.zeros([13, vcm.shape[2]])
+    # find the vector of julian days for a typical year
+    jdays = []
     time_avg = []
+    for d in time:
+        if d.year == 2007:
+            jdays.append((d - datetime(2007,1,1)).days)
+            time_avg.append(d)
+    
+    nprof_avg = np.zeros([len(jdays), vcm.shape[2]])
+    vcm_avg = dict()
+    for ialtmin in range(len(altmin)):
+        vcm_avg[ialtmin] = np.zeros([len(jdays), vcm.shape[2]])
+    cf_anom = np.zeros_like(vcm, dtype='float64')
 
-    # anomalies
-    vcm_anom = np.zeros_like(vcm)
-
-    for month in range(1,13):
+    for i, jday in enumerate(jdays):
         
-        time_avg.append(datetime.datetime(2010, month, 15))
-        idx = np.array([month==date.month for date in time])
-        nprof_avg[month,:] = np.sum(nprof[idx,:], axis=0)
+        idx = np.array([jday==(date - datetime(date.year, 1, 1)).days for date in time])
+        print jday, ' - found {} days'.format(idx.sum())
+        nprof_avg[i,:] = np.sum(nprof[idx,:], axis=0)
         
         for ialtmin in 0, 1, 2:
             
-            vcm_avg[ialtmin][month,:] = np.mean(vcm[ialtmin,idx,:], axis=0)
-            vcm_anom[ialtmin,idx,:] = vcm[ialtmin,idx,:] - vcm_avg[ialtmin][month   ,:]
-
-    time_avg[:0] = [datetime.datetime(2009,12,15)]
-    nprof_avg[0,:] = nprof_avg[12,:]
-    for ialtmin in 0, 1, 2:
-        vcm_avg[ialtmin][0,:] = vcm_avg[ialtmin][12,:]
+            vcm_avg[ialtmin][i,:] = np.sum(vcm[ialtmin,idx,:], axis=0)
+            cf_avg = 1. * vcm_avg[ialtmin][i,:] / nprof_avg[i,:]
+            actual_cf = 1. * vcm[ialtmin,idx,:] / nprof[idx,:]
+            cf_anom[ialtmin,idx,:] = actual_cf - cf_avg
 
     for ialtmin in 0, 1, 2:
 
         cf = 1. * vcm_avg[ialtmin] / nprof_avg
         pcolor_meridhov(time_avg, lon, cf, 'clouds above > %2d km - Average year' % (altmin[ialtmin]))
-        nice.savefig('cf_avg_above%02dkm.png' % (altmin[ialtmin]))
+        nice.savefig(infile[:-4] + '_avg_above%02dkm.png' % (altmin[ialtmin]))
 
-        cf = 1. * vcm_anom[ialtmin,:,:] / nprof
-        pcolor_meridhov(time, lon, cf, 'clouds above > %2d km - Anomaly' % (altmin[ialtmin]), anom=True)
-        nice.savefig('cf_anom_above%02dkm.png' % (altmin[ialtmin]))
+        pcolor_meridhov(time, lon, cf_anom[ialtmin], 'clouds above > %2d km - Anomaly' % (altmin[ialtmin]), anom=True)
+        nice.savefig(infile[:-4] + '_anom_above%02dkm.png' % (altmin[ialtmin]))
     
     plt.show()
 

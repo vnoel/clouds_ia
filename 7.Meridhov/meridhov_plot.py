@@ -18,9 +18,9 @@ def pcolor_meridhov(time, lon, cf, title):
     plt.xlim(-180, 180)
     plt.title(title)
 
-def main(input='series_30.npz'):
+def main(infile='series_40.npz'):
     
-    npz = np.load(input)
+    npz = np.load(infile)
     nprof = npz['nprof']
     vcm = npz['vcm']
     time = npz['time']
@@ -28,10 +28,13 @@ def main(input='series_30.npz'):
     altmin = npz['altmin']
     vcm = vcm.swapaxes(0, 1)
 
+    pcolor_meridhov(time, lon, nprof, 'Number of profiles')
+    nice.savefig('%s_nprof.png' % (infile[:-4]))
+
     for ialtmin in 0,1,2:
         cf = 1. * vcm[ialtmin,...] / nprof
         pcolor_meridhov(time, lon, cf, 'clouds above > %5f km' % (altmin[ialtmin]))
-        nice.savefig('cf_above%02dkm.png' % (altmin[ialtmin]))
+        nice.savefig('%s_above%02dkm.png' % (infile[:-4], altmin[ialtmin]))
     
     plt.show()
 
