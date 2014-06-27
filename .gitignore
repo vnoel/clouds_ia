@@ -3,7 +3,7 @@
 __pycache__
 *.pyc
 out
-*/in
+in*
 in_width
 *.e*
 *.o*
