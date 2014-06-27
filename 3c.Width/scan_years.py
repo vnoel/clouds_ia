@@ -47,7 +47,7 @@ def scan_years(years, where='./out/'):
     for year in years:
         for month in months:
         
-            monthfile = 'in/%04d/vcm_zonal_%04d%02d.nc4' % (year, year, month)
+            monthfile = 'in.monthly/%04d/vcm_zonal_%04d%02d.nc4' % (year, year, month)
         
             tropic_range = month_tropic_width(monthfile)
             if tropic_range is None:
