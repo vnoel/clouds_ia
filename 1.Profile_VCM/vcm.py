@@ -22,7 +22,7 @@ class VCM(object):
         # mask = 'cal333+cal05+cal20+cal80+csat' for instance
         
         if '+' not in mask:
-            output = self.data[mask]
+            output = np.clip(self.data[mask].values, 0, 1)
         else:
             names = mask.split('+')
             if not all(name in self.data for name in names):
