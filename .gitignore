@@ -11,3 +11,4 @@ in_width
 .fuse*
 *.npz
 *png
+*.pdf
