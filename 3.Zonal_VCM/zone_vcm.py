@@ -38,13 +38,14 @@ def zone_vcm_from_vcm_orbit(vcm_orbit, latbins=latbins):
         cprof = np.zeros([nlat], dtype='uint16')
         
         prof_is_cloudy = (np.sum(this_vcm, axis=1) > 0)
-        h, xx = np.histogram(v.lat, bins=latbins, weights=prof_is_cloudy)
+        h, xx = np.histogram(v.lat, bins=latbins, weights=1 * prof_is_cloudy)
         cprof[:-1] = h
-        out[name + '_cprof'] = da.DimArray(cprof, labels=[latbins], dims=['lat'])
+        out[name + '_cprof'] = da.DimArray(cprof, labels=[latbins], dims=['lat',])
         
         for i,ilatbin in enumerate(ilatbins):
             if prof_is_cloudy[i]:
-                zone_vcm[ilatbin,:] += this_vcm[i,:]        
+                # zone_vcm[ilatbin,:] += this_vcm[i,:]
+                np.add(zone_vcm[ilatbin,:], this_vcm[i,:], out=zone_vcm[ilatbin,:])
         out[name] = da.DimArray(zone_vcm, labels=[latbins, v.altitude], dims=['lat', 'altitude'], longname='Number of cloudy points in lat-z bin, considering ' + name)
     
     return out
