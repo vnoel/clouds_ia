@@ -4,6 +4,7 @@
 # Forked by VNoel on 2014-06-04
 
 import numpy as np
+import niceplots as nice
 import matplotlib.pyplot as plt
 
 vcm_mins = [0.05, 0.15, 0.25, 0.35]
@@ -12,8 +13,6 @@ colors = {0.05:'k', 0.15:'r', 0.25:'b', 0.35:'gray'}
 def main(infile='tropic_width_40.npz'):
     npz = np.load(infile)
     tmin, tmax, time = npz['tmin'], npz['tmax'], npz['datetimes']
-    
-    print time
     
     tmin = np.array(tmin).item()
     tmax = np.array(tmax).item()
@@ -41,6 +40,8 @@ def main(infile='tropic_width_40.npz'):
         plt.plot(time, this_tmax - this_tmin, colors[vcm_min])
     plt.ylabel('Tropics meridional height')
     plt.grid()
+    
+    nice.savefig(infile[:-4] + '.png')
     
     plt.show()
     

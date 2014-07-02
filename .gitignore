@@ -7,6 +7,7 @@ in*
 in_width
 *.e*
 *.o*
+*.py~
 .fuse*
 *.npz
 *png
