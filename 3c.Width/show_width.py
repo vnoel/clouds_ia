@@ -18,7 +18,7 @@ def main(infile='tropic_width_40.npz'):
     tmax = np.array(tmax).item()
     
     
-    plt.figure(figsize=[15,10])
+    plt.figure(figsize=[18,10])
     plt.subplot(2,1,1)
     for vcm_min in vcm_mins:
         this_tmin = np.array(tmin[vcm_min])
@@ -41,7 +41,7 @@ def main(infile='tropic_width_40.npz'):
     plt.ylabel('Tropics meridional height')
     plt.grid()
     
-    nice.savefig(infile[:-4] + '.png')
+    nice.savefig(infile[:-4] + '.pdf')
     
     plt.show()
     
