@@ -49,7 +49,7 @@ def main(year=2007, month=None, day=None, where='out/'):
     else:
         year = int(year)
         start = datetime(year, 1, 1)
-        end = datetime(year, 12, 31)
+        end = datetime(year+1, 1, 1)
 
     process_vcm_orbits_period(start, end, where)
 
