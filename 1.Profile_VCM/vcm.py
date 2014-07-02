@@ -10,10 +10,12 @@ import numpy as np
 class VCM(object):
     
     def __init__(self, filename):
-    
-        self.data = da.read_nc(filename)
-        self.lon = self.data['lon'].values
-        self.lat = self.data['lat'].values
+
+        self.filename = filename
+        self.lon = da.read_nc(filename, 'lon').values
+        self.lat = da.read_nc(filename, 'lat').values
+        self.data = da.Dataset()
+        self.data['cal333'] = da.read_nc(filename, 'cal333')
         self.altitude = self.data['cal333'].altitude
         
     
@@ -21,28 +23,29 @@ class VCM(object):
         
         # mask = 'cal333+cal05+cal20+cal80+csat' for instance
         
-        if '+' not in mask:
-            output = np.clip(self.data[mask].values, 0, 1)
-        else:
+        if '+' in mask:
             names = mask.split('+')
-            if not all(name in self.data for name in names):
-                print 'Warning : some requested vcms are not present in file. Contained data :'
-                print self.data
-                return None        
 
             # this is waaaay slower
             # output = np.sum([self.data[name].values for name in names], axis=0)
 
-            # need to clip this between 0,1
-            # missing data in a vcm is flagged with -1
-
-            # this can happen e.g. for csat when there are no files.
+            # negative data can happen e.g. for csat when there are no files.
             # it does *not* happen when the are no colocated profile, as far as I know.
             # need to do sthing better than that ?
-            output = np.clip(self.data[names[0]].values, 0, 1)
+            if names[0] not in self.data:
+                self.data[names[0]] = da.read_nc(self.filename, names[0])
+            output = np.clip(self.data[names[0]], 0, 1)
             for name in names[1:]:
-                output += np.clip(self.data[name].values, 0, 1)
-            output = np.clip(output, 0, 1)
+                if name not in self.data:
+                    self.data[name] = da.read_nc(self.filename, name)
+                if 'csat' in name:
+                    self.data[name] = np.clip(self.data[name], 0, 1)
+                output += self.data[name]
+            output = np.clip(output.values, 0, 1)
+        else:
+            if mask not in self.data:
+                self.data[mask] = da.read_nc(self.filename, mask)
+            output = np.clip(self.data[mask].values, 0, 1)
 
         return output
 
