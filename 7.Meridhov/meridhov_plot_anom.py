@@ -8,24 +8,30 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.dates import date2num
 import niceplots as nice
+import matplotlib.dates as mdates
+
+fmt = mdates.DateFormatter('%b')
 
 def pcolor_meridhov(time, lon, cf, title, anom=False):
     if anom:
         plt.figure(figsize=[7,10])
     else:
-        plt.figure()
+        plt.figure(figsize=[7,3])
     time = date2num(time)
     ax = plt.gca()
     if anom:
         plt.pcolormesh(lon, time, cf, cmap='RdBu_r')
-        plt.clim(-0.1,0.1)
+        plt.clim(-0.05,0.05)
     else:
-        plt.contourf(lon, time, cf)
+        plt.pcolormesh(lon, time, cf, shading='gouraud')
+        plt.gca().yaxis.set_major_formatter(fmt)
+        plt.ylim(datetime(2007,1,1), datetime(2007,12,31))
     ax.yaxis.axis_date()
         
     plt.colorbar()
     plt.xlim(-180, 180)
     plt.title(title)
+
 
 def main(infile='series_40.npz'):
     
@@ -35,6 +41,7 @@ def main(infile='series_40.npz'):
     time = npz['time']
     lon = npz['lon']
     altmin = npz['altmin']
+    
     # exchange time and altmin axes
     vcm = vcm.swapaxes(0, 1)
     # now vcm[altmin,time,lon]

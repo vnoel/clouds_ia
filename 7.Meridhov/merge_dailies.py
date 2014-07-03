@@ -13,7 +13,7 @@ vcm_name = 'cal333+cal05+cal20+cal80+csat'
 # window is the time in days over which to do the averaging
 # step is the difference in weeks between each average
 
-def main(year='2008', window=40, step=1, indir='out.daily'):
+def main(year, window=40, step=1, indir='out.daily'):
     
     import glob
     import os

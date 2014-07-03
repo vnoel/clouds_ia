@@ -21,7 +21,7 @@ def filename_to_datetime(filename):
 
 def main(window):
     window = int(window)
-    years = range(2006,2014)
+    years = range(2006,2015)
     fullvcm = []
     fullnprof = []
     for year in years:
