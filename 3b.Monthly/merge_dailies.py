@@ -10,7 +10,7 @@ import dimarray as da
 
 def dayfiles_sum_dataset(files):
     
-    names = ['cal333+cal05+cal20+cal80+csat', 'cal333+cal05+cal20+cal80+csat_cprof']
+    names = ['cal333+cal05+cal20+cal80+csat', 'cal333+cal05+cal20+cal80+csat_cprof', 'nprof']
     aggregated = da.Dataset()
     for name in names:
         data = da.read_nc(files, name, axis='filename')
@@ -22,7 +22,7 @@ def dayfiles_sum_dataset(files):
 def dayfiles_sum_dataset_old(files):
     
     aggregated = da.Dataset()
-    names = ['cal333+cal05+cal20+cal80+csat', 'cal333+cal05+cal20+cal80+csat_cprof']
+    names = ['cal333+cal05+cal20+cal80+csat', 'cal333+cal05+cal20+cal80+csat_cprof', 'nprof']
 
     for name in names:
         data = da.read_nc(files[0], name)
@@ -76,7 +76,7 @@ def scan_period(start, end, window=40, step=7, where='./out.{:02d}/', indir='./i
         current += timedelta(days=step)
     
 
-def main(year=2007, month=None):
+def main(year, month=None):
     
     year = int(year)
     start = datetime(year, 1, 1)

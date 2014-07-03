@@ -64,7 +64,7 @@ def scan_years(years, where='./out/'):
 
 def main():
     
-    years = np.r_[2006:2014]        
+    years = np.r_[2006:20155]        
     scan_years(years)
     
 

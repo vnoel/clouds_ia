@@ -99,7 +99,7 @@ def scan_years(years, window=40):
 
 def main():
     
-    years = np.r_[2006:2014]        
+    years = np.r_[2006:2015]        
     scan_years(years)
     
 
