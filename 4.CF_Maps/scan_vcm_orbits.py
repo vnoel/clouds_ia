@@ -8,10 +8,10 @@ from cf_vcm import cf_file_from_vcm_orbits
 import glob
 import os
 
-layers = {'total':[0, 22.5], 'low':[0, 2.75], 'mid':[2.75, 7], 'high':[7, 22.5]}
+layers = {'total':[0, 22.5], 'low':[0.96, 2.75], 'mid':[2.75, 7], 'high':[7, 22.5]}
 
 
-def process_vcm_orbits_period(start, end, where, altrange):
+def process_vcm_orbits_period(start, end, where):
 
     if not os.path.isdir(where):
         print 'Creating dir ' + where
@@ -28,14 +28,14 @@ def process_vcm_orbits_period(start, end, where, altrange):
             continue
         
         outpath = where + '%04d%02d/' % (current.year, current.month)
-        outname = 'cf_%s_%04d-%02d-%02d.nc4' % (altrange, current.year, current.month, current.day)
+        outname = 'cloud_maps_%04d-%02d-%02d.nc4' % (current.year, current.month, current.day)
         
-        cf_file_from_vcm_orbits(vcm_files, layers[altrange], outname, where=outpath)
+        cf_file_from_vcm_orbits(vcm_files, layers, outname, where=outpath)
         
         current += timedelta(days=1)
 
 
-def main(altrange, year=2007, month=None, day=None, where='out/'):
+def main(year=2007, month=None, day=None, where='out.daily/'):
 
     if day is not None and month is not None:
         year, month, day = int(year), int(month), int(day)
@@ -50,7 +50,7 @@ def main(altrange, year=2007, month=None, day=None, where='out/'):
         start = datetime(year, 1, 1)
         end = datetime(year, 12, 31)
 
-    process_vcm_orbits_period(start, end, where, altrange)
+    process_vcm_orbits_period(start, end, where)
 
 
 def test_day_grid_for_orbits():
