@@ -3,6 +3,7 @@
 __pycache__
 *.pyc
 out
+out.daily
 in*
 in_width
 *.e*
