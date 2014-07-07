@@ -52,9 +52,14 @@ class VCM(object):
 
 def aggregate_arrays_from_files(filemask, array_names, summed_along=None):
     
+    import glob
+    
     aggregated = dict()
     
     for name in array_names:
+
+        print 'Aggregating array %s from %d files' % (name, len(filemask))
+    
         data = da.read_nc(filemask, name, axis='orbit')
         if summed_along:
             data = data.sum(axis=summed_along)
