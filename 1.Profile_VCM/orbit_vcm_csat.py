@@ -14,13 +14,17 @@ def _geoprof_vcm_on_altitudes(geo_vcm, geo_alt, altitudes):
     nprof = geo_vcm.shape[0]
     nalt = altitudes.shape[0]
 
+    
+
     vcm = np.zeros([nprof, nalt], dtype='int8')
     for i in np.arange(nprof):
         if np.max(geo_alt[i,:]) < 20:
             continue
         f = interp1d(geo_alt[i,::-1], geo_vcm[i,::-1], kind='nearest')
         vcm[i,:] = f(altitudes)
-    vcm = (vcm >= 20)
+    vcm = (vcm >= 20) & (vcm <= 40)
+    idx = (altitudes < 0.72)
+    vcm[:,idx] = 0
     
     return vcm
 
