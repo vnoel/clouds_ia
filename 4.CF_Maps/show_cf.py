@@ -4,8 +4,9 @@
 # Created by VNoel on 2014-04-28
 
 import numpy as np
-import dimarray as da
+import niceplots as nice
 import matplotlib.pyplot as plt
+from vcm import aggregate_arrays_from_files
 
 
 vcm_name = 'cal333+cal05+cal20+cal80+csat'
@@ -22,67 +23,57 @@ def pcolor_cf(x, y, vcmarray, title=None):
     m.drawcoastlines()
     m.drawparallels(np.r_[-90:90:30], labels=[1,0,0,0])
     plt.colorbar()
-    plt.clim(0, 1.)
+    # plt.clim(0, 1.)
     if title is not None:
         plt.title(title)
 
 
-def aggregate_arrays_from_files(files, array_names, summed_along=None):
+def zonal(lat, v, title=None):
     
-    aggregated = dict()
-
-    files.sort()
-    prevmax = 0
-
-    for f in files:
-
-        print f
-
-        data = da.read_nc(f)
-        if any(array_name not in data for array_name in array_names):
-            print 'Missing data'
-            continue
-        for array_name in array_names:
-
-            array = data[array_name]
-
-            if summed_along is not None:
-                array = array.sum(axis=summed_along)            
-            if array_name not in aggregated:
-                aggregated[array_name] = 1. * array
-            else:
-                aggregated[array_name] += array
-        
-            if aggregated[array_name].max() < prevmax:
-                print 'PROBLEME !'
-                print 'Previous maximum = ', prevmax, ', current max = ', aggregated[array_name].max()
-
-    data = [aggregated[array_name] for array_name in array_names]
-    return data
+    print lat.shape, v.shape
+    
+    plt.figure(figsize=[10,5])
+    plt.plot(lat, v)
+    plt.title(title)
+    plt.xlim(-90,90)
+    plt.xticks(np.r_[-90:90:30])
+    plt.ylabel('CF')
+    plt.ylim(0,80)    
+    plt.grid()
 
 
-def show_files(files, layer):
+def show_files(files, layer, title, period):
     
     cprof, nprof = aggregate_arrays_from_files(files, [vcm_name + '_cprof_' + layer, 'nprof'])
     
-    cloudypoints = np.ma.masked_where(nprof.values==0, 1. * cprof.values / nprof.values)
-    cloudypoints = np.ma.masked_invalid(cloudypoints)
+    cf = np.ma.masked_where(nprof.values==0, 100. * cprof.values / nprof.values)
+    cf = np.ma.masked_invalid(cf)
     
-    pcolor_cf(cprof.labels[0], cprof.labels[1], cloudypoints, title=layer)
+    pcolor_cf(cprof.labels[0], cprof.labels[1], cprof.values, title=title + ' - cloud counts')
+    nice.savefig('cc_%s_2008_%s.png' % (layer, period))
+    pcolor_cf(cprof.labels[0], cprof.labels[1], nprof.values, title=title + ' - total counts')
+    nice.savefig('tc_%s_2008_%s.png' % (layer, period))
+    pcolor_cf(cprof.labels[0], cprof.labels[1], cf, title=title + ' - cloud fraction')
+    nice.savefig('cf_%s_2008_%s.png' % (layer, period))
+    
+    cfzonal = 100. * cprof.sum(axis='lon') / nprof.sum(axis='lon')
+    zonal(cprof.labels[1], cfzonal, title=title + ' - cloud fraction')
     #plt.clim(0,100)
 
 
-def main(layer='high'):
+def main(layer='high', period='jja'):
     
     import glob
     
+    months = {'jja':[6,7,8], 'djf':[12,1,2]}
+    
     files = []
     base = 'out.daily/2008%02d/*nc4'
-    for month in 6,7,8:
+    for month in months[period]:
         x = glob.glob(base % month)
         files.extend(x)
     assert len(files) > 0
-    show_files(files, layer)
+    show_files(files, layer, '2008 - ' + layer + ' - '+ period, period)
     
     plt.show()
     
