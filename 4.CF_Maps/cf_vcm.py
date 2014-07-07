@@ -5,31 +5,30 @@
 
 import numpy as np
 import dimarray as da
+import vcm
 
 vcm_names = ['cal333+cal05+cal20+cal80+csat']
 
 # create grid
+lstep = 2.
 lonbins = np.r_[-180:180+lstep:lstep]
 latbins = np.r_[-90:90+lstep:lstep]
 
-def cf_from_vcm_orbit(vcm_orbit, layers, lstep=2.):
+def cf_from_vcm_orbit(vcm_orbit, layers):
     
     # read data
     v = vcm.VCM(vcm_orbit)
-    plon = v.lon.values
-    plat = v.lat.values
         
     altitude = v.altitude
+    out = da.Dataset()
     
     for layer in layers:
         
         altrange = layers[layer]
         altidx = (altitude >= altrange[0]) & (altitude < altrange[1])
         
-        out = da.Dataset()
-
         # gridded number of profiles
-        h, xx, yy = np.histogram2d(plon, plat, bins=(lonbins, latbins))
+        h, xx, yy = np.histogram2d(v.lon, v.lat, bins=(lonbins, latbins))
         out['nprof'] = da.DimArray(h, labels=[lonbins[:-1], latbins[:-1]], dims=['lon', 'lat'])
         out['nprof'].longname = 'Number of measured profiles'
 
@@ -43,25 +42,12 @@ def cf_from_vcm_orbit(vcm_orbit, layers, lstep=2.):
             cloudy_profile = np.sum(this_vcm[:,altidx], axis=1)
             np.clip(cloudy_profile, 0, 1, out=cloudy_profile)
         
-            h, xx, yy = np.histogram2d(plon, plat, bins=(lonbins, latbins), weights=cloudy_profile)
+            h, xx, yy = np.histogram2d(v.lon, v.lat, bins=(lonbins, latbins), weights=cloudy_profile)
             outname = vcm_name + '_cprof_%s' % (layer)
             out[outname] = da.DimArray(h, labels=[lonbins[:-1], latbins[:-1]], dims=['lon', 'lat'])
-            out[outname].longname = 'Number of cloudy profiles from cloud mask = ' + vcm_name + ' at altitudes %5.2f - %5.2f' % (*altrange)
+            out[outname].longname = 'Number of cloudy profiles from cloud mask = ' + vcm_name + ' at altitudes %5.2f - %5.2f' % (altrange[0], altrange[1])
     
     return out
-
-
-def cf_file_from_vcm_orbit(vcm_orbit, where='./out/'):
-    
-    import os
-    
-    dataset = cf_from_vcm_orbit(vcm_orbit)
-    
-    outname = 'cf_' + vcm_orbit[-25:]
-    if not os.path.isdir(where):
-        print 'Creating dir ' + where
-        os.mkdir(where)
-    dataset.write_nc(where + outname, mode='w', zlib=True, complevel=9)
 
 
 def cf_file_from_vcm_orbits(vcm_orbits, layers, outname, where='./out'):

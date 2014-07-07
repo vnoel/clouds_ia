@@ -20,6 +20,7 @@ def pcolor_cf(x, y, vcmarray, title=None):
     plt.figure(figsize=[10,5])
     m.pcolormesh(x, y, vcmarray.T)
     m.drawcoastlines()
+    m.drawparallels(np.r_[-90:90:30], labels=[1,0,0,0])
     plt.colorbar()
     plt.clim(0, 1.)
     if title is not None:
@@ -34,6 +35,8 @@ def aggregate_arrays_from_files(files, array_names, summed_along=None):
     prevmax = 0
 
     for f in files:
+
+        print f
 
         data = da.read_nc(f)
         if any(array_name not in data for array_name in array_names):
@@ -58,32 +61,28 @@ def aggregate_arrays_from_files(files, array_names, summed_along=None):
     return data
 
 
-def show_files(files, title):
+def show_files(files, layer):
     
-    cprof, nprof = aggregate_arrays_from_files(files, [vcm_name + '_cprof', 'nprof'])
+    cprof, nprof = aggregate_arrays_from_files(files, [vcm_name + '_cprof_' + layer, 'nprof'])
     
     cloudypoints = np.ma.masked_where(nprof.values==0, 1. * cprof.values / nprof.values)
     cloudypoints = np.ma.masked_invalid(cloudypoints)
     
-    pcolor_cf(cprof.labels[0], cprof.labels[1], cloudypoints, 'cloud fraction ' + title)
+    pcolor_cf(cprof.labels[0], cprof.labels[1], cloudypoints, title=layer)
     #plt.clim(0,100)
 
 
-def main(vcm_grid_file='./out/200707/vcm_grid_2007-07-01.nc4'):
+def main(layer='high'):
     
     import glob
     
-    #show_file(vcm_grid_file, vcm_grid_file)
-    
-    mask = 'out/200706/cf*.nc4'
-    grid_files = glob.glob(mask)
-    mask = 'out/200707/cf*.nc4'
-    grid_files += glob.glob(mask)
-    mask = 'out/200708/cf*.nc4'
-    grid_files += glob.glob(mask)
-    grid_files.sort()
-
-    show_files(grid_files, '2007 JJA')
+    files = []
+    base = 'out.daily/2008%02d/*nc4'
+    for month in 6,7,8:
+        x = glob.glob(base % month)
+        files.extend(x)
+    assert len(files) > 0
+    show_files(files, layer)
     
     plt.show()
     
