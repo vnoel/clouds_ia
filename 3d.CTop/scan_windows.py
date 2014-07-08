@@ -17,28 +17,31 @@ def read_vars(f):
     try:
         vcm = da.read_nc(f, 'cal333+cal05+cal20+cal80+csat')
         cprof = da.read_nc(f, 'cal333+cal05+cal20+cal80+csat_cprof')
-        # nprof = da.read_nc(f, 'nprof')
+        nprof = da.read_nc(f, 'nprof')
     except KeyError:
         return None, None, None
         
-    return vcm, cprof#, nprof
+    return vcm, cprof, nprof
 
 
-def compute_cf(vcm, nprof):
+def compute_cf(vcm, cprof, nprof):
 
-    cf_lat = 1. * vcm.values.T / nprof.values
+    cf_lat = 1. * vcm.values.T / cprof.values
     cf_lat = np.ma.masked_invalid(cf_lat.T)
 
-    return cf_lat
+    cf_lat2 = 1. * vcm.values.T / nprof.values
+    cf_lat2 = np.ma.masked_invalid(cf_lat2.T)
+
+    return cf_lat, cf_lat2
 
 
 def window_cloud_ceiling(f):
 
-    vcm, nprof = read_vars(f)
-    cf_lat = compute_cf(vcm, nprof)
+    vcm, cprof, nprof = read_vars(f)
+    cf_lat, cf_lat2 = compute_cf(vcm, cprof, nprof)
         
-    ceiling = tropic_width.cloud_cover_top(vcm.altitude, cf_lat)    
-    return ceiling, vcm.lat, nprof #, cprof
+    ceiling = tropic_width.cloud_cover_top(vcm.altitude, cf_lat)
+    return ceiling, vcm.lat, cprof, nprof
     
 
 def scan_years(years, window=40):
@@ -46,7 +49,7 @@ def scan_years(years, window=40):
     where='./in.%02d/' % (window)
     
     datetimes = []
-    ceilings = np.zeros([52*len(years), 16401])
+    ceilings = np.zeros([60*len(years), 16401])
     nprofs = np.zeros_like(ceilings, dtype='uint32')
     cprofs = np.zeros_like(ceilings, dtype='uint32')
     print ceilings.shape
@@ -63,7 +66,7 @@ def scan_years(years, window=40):
         print '%d : %d files' % (year, len(files))
         for f in files:
                         
-            ceiling, lat, nprof = window_cloud_ceiling(f)
+            ceiling, lat, cprof, nprof = window_cloud_ceiling(f)
             assert ceiling is not None
             
             year = int(f[-12:-8])
@@ -73,15 +76,17 @@ def scan_years(years, window=40):
             
             ceilings[i,:] = ceiling
             nprofs[i,:] = nprof
-            # cprofs[i,:] = cprof
+            cprofs[i,:] = cprof
+
+            print np.sum(nprof), np.sum(cprof), 100. * np.sum(cprof) / np.sum(nprof)
             
             i += 1
 
-    np.savez('ceilings_%02d.npz' % window, ceilings=ceilings, datetimes=datetimes, lat=lat, nprof=nprofs)
+    np.savez('ceilings_%02d.npz' % window, ceilings=ceilings, datetimes=datetimes, lat=lat, cprof=cprofs, nprof=nprofs)
 
 def main():
     
-    years = np.r_[2006:2014]        
+    years = np.r_[2006:2015]
     scan_years(years)
     
 

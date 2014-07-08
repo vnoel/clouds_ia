@@ -37,6 +37,8 @@ def dayfiles_to_monthfile(files, outfile):
     
     monthly_sum = dayfiles_sum_dataset_old(files)
     print 'Saving ' + outfile
+    print '   nprofsum = ', np.sum(monthly_sum['nprof'])
+    print '   cf = ', 100. * np.sum(monthly_sum['cal333+cal05+cal20+cal80+csat_cprof']) / np.sum(monthly_sum['nprof'])
     monthly_sum.write_nc(outfile, 'w')
 
 
@@ -49,8 +51,12 @@ def scan_period(start, end, window=40, step=7, where='./out.{:02d}/', indir='./i
         
         # create list of files for current averaging window
         
-        c = current - timedelta(days=window/2)
+        # while current.month < 7:
+        #     current += timedelta(days=step)
+        
+        this_start = current - timedelta(days=window/2)
         this_end = current + timedelta(days=window/2)
+        c = this_start
         files = []
         while c < this_end:
             this_mask = indir + '/{:04d}{:02d}/vcm_zonal_{:04d}-{:02d}-{:02d}.nc4'.format(c.year, c.month, c.year, c.month, c.day)
@@ -70,7 +76,8 @@ def scan_period(start, end, window=40, step=7, where='./out.{:02d}/', indir='./i
             print('Creating '+where + '%04d' % current.year)
             os.mkdir(where + '%04d' % current.year)
         outfile = where + '%04d/vcm_zonal_%04d%02d%02d.nc4' % (current.year, current.year, current.month, current.day)
-        print current, ' : aggregating %d files' % len(files)
+        print current.date(), ' : aggregating %d files' % len(files)
+        print 'period : ', this_start.date(), this_end.date()
         dayfiles_to_monthfile(files, outfile)
         
         current += timedelta(days=step)
