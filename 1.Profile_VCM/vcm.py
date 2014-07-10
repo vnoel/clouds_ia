@@ -59,12 +59,19 @@ def aggregate_arrays_from_files(filemask, array_names, summed_along=None):
     for name in array_names:
 
         print 'Aggregating array %s from %d files' % (name, len(filemask))
-    
-        data = da.read_nc(filemask, name, axis='orbit')
-        if summed_along:
-            data = data.sum(axis=summed_along)
-        aggregated[name] = data.sum(axis='orbit')
+        for f in filemask:
+            data = da.read_nc(f, name)
+            if name not in aggregated:
+                aggregated[name] = 1. * data
+            else:
+                aggregated[name] += data
+        #
+        # data = da.read_nc(filemask, name, axis='orbit')
+        # if summed_along:
+        #     data = data.sum(axis=summed_along)
+        # aggregated[name] = data.sum(axis='orbit')
     
     data = [aggregated[array_name] for array_name in array_names]
     
     return data
+    
