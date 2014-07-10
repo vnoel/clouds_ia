@@ -10,17 +10,6 @@ import dimarray as da
 
 def dayfiles_sum_dataset(files):
     
-    names = ['cal333+cal05+cal20+cal80+csat', 'cal333+cal05+cal20+cal80+csat_cprof', 'nprof']
-    aggregated = da.Dataset()
-    for name in names:
-        data = da.read_nc(files, name, axis='filename')
-        data = data.sum(axis='filename')
-        aggregated[name] = data
-    return aggregated
-    
-    
-def dayfiles_sum_dataset_old(files):
-    
     aggregated = da.Dataset()
     names = ['cal333+cal05+cal20+cal80+csat', 'cal333+cal05+cal20+cal80+csat_cprof', 'nprof']
 
@@ -35,7 +24,7 @@ def dayfiles_sum_dataset_old(files):
 
 def dayfiles_to_monthfile(files, outfile):
     
-    monthly_sum = dayfiles_sum_dataset_old(files)
+    monthly_sum = dayfiles_sum_dataset(files)
     print 'Saving ' + outfile
     print '   nprofsum = ', np.sum(monthly_sum['nprof'])
     print '   cf = ', 100. * np.sum(monthly_sum['cal333+cal05+cal20+cal80+csat_cprof']) / np.sum(monthly_sum['nprof'])
@@ -51,8 +40,8 @@ def scan_period(start, end, window=40, step=7, where='./out.{:02d}/', indir='./i
         
         # create list of files for current averaging window
         
-        # while current.month < 7:
-        #     current += timedelta(days=step)
+        while current.month < 9:
+            current += timedelta(days=step)
         
         this_start = current - timedelta(days=window/2)
         this_end = current + timedelta(days=window/2)

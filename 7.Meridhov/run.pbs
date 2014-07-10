@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 # qsub run.pbs -v year=2007
 
-#PBS -N cf
+#PBS -N MERIDHOV
 #PBS -m e
 #PBS -l walltime=6:00:00
 

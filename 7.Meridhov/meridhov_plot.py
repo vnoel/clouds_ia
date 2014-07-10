@@ -9,14 +9,19 @@ from matplotlib.dates import date2num
 import niceplots as nice
 
 def pcolor_meridhov(time, lon, cf, title):
-    plt.figure()
+    plt.figure(figsize=[5,15])
     time = date2num(time)
     ax = plt.gca()
     plt.pcolormesh(lon, time, cf)
     ax.yaxis.axis_date()
-    plt.colorbar()
+    cb = plt.colorbar(orientation='horizontal', pad=0.05)
+    cb.set_label('Cloud Fraction [%]')
     plt.xlim(-180, 180)
+    plt.xlabel('Longitude')
+    plt.clim(0,30)
+    plt.ylim(time[0], time[-1])
     plt.title(title)
+    plt.tight_layout()
 
 def main(infile='series_40.npz'):
     
@@ -33,7 +38,7 @@ def main(infile='series_40.npz'):
 
     for ialtmin in 0,1,2:
         cf = 1. * vcm[ialtmin,...] / nprof
-        pcolor_meridhov(time, lon, cf, 'clouds above > %5f km' % (altmin[ialtmin]))
+        pcolor_meridhov(time, lon, 100.*cf, 'Above %2d km' % (altmin[ialtmin]))
         nice.savefig('%s_above%02dkm.png' % (infile[:-4], altmin[ialtmin]))
     
     plt.show()

@@ -51,7 +51,6 @@ def process_vcm_orbits_period(start, end, where):
         outpath = where + '%04d%02d/' % (current.year, current.month)
         outname = 'cflon_%04d-%02d-%02d.nc4' % (current.year, current.month, current.day)
         
-        
         meridhov.cflon_files(vcm_files, altmin, latbounds, outname, where=outpath)
         
         current += timedelta(days=1)

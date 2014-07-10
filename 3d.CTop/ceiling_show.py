@@ -45,6 +45,18 @@ def average_year(dtlist, ceil, badidx):
     
     return avg_dtlist, avg_ceil
 
+def anomalies(dtavg, avg, dtval, val):
+    
+    anom = np.zeros_like(val)
+    for i, dt in enumerate(dtval):
+        jday = (dt - datetime(dt.year, 1, 1)).days
+        for j, thisavgdt in enumerate(dtavg):
+            ajday = (thisavgdt - datetime(thisavgdt.year, 1, 1)).days
+            if ajday==jday:
+                anom[i,:] = val[i,:] - avg[j,:]
+                break
+    return anom
+
 
 def main():
     npz = np.load('ceilings_40.npz')
@@ -73,7 +85,7 @@ def main():
 
     dtnum = mdates.date2num(dt)
 
-    plt.figure(figsize=[20,5])
+    plt.figure(figsize=[24,4])
     plt.pcolormesh(dtnum, lat, ceil.T)
     plt.xlim(dtnum[0], dtnum[-1])
     plt.ylim(lat[0], lat[-1])
@@ -108,6 +120,21 @@ def main():
 
     plt.savefig('ceilings_avg.png')
 
+    anom = anomalies(avgdt, avgceil, dt, ceil)
+    anom[np.abs(anom) > 1] = 0
+    plt.figure(figsize=[24,4])
+    plt.pcolormesh(dtnum, lat, anom.T, cmap='RdBu_r')
+    plt.xlim(dtnum[0], dtnum[-1])
+    plt.ylim(-60,60)
+    cb = plt.colorbar()
+    plt.clim(-1, 1)
+    cb.set_label('[km]')
+    plt.gca().xaxis.axis_date()
+    plt.ylabel('Latitude')
+    plt.title('Cloud top anomalies')
+    plt.grid()
+    
+    plt.savefig('ceilings_anom.png')
         
 
     plt.show()

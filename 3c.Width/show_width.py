@@ -18,7 +18,7 @@ def main(infile='tropic_width_40.npz'):
     tmax = np.array(tmax).item()
     
     
-    plt.figure(figsize=[18,10])
+    plt.figure(figsize=[24,7])
     plt.subplot(2,1,1)
     for vcm_min in vcm_mins:
         this_tmin = np.array(tmin[vcm_min])
@@ -40,6 +40,7 @@ def main(infile='tropic_width_40.npz'):
         this_tmax = np.ma.masked_where(this_tmax < -90, this_tmax)
         # plt.plot(time, this_tmax - this_tmin, colors[vcm_min])
         plt.fill_between(time, 0, this_tmax - this_tmin, alpha=0.3)
+    plt.ylim(0, 50)
     plt.ylabel('Tropics meridional height')
     plt.grid()
     

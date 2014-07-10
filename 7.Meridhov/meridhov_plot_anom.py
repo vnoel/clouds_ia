@@ -27,10 +27,15 @@ def pcolor_meridhov(time, lon, cf, title, anom=False):
         plt.gca().yaxis.set_major_formatter(fmt)
         plt.ylim(datetime(2007,1,1), datetime(2007,12,31))
     ax.yaxis.axis_date()
+    plt.xlabel('Longitude')
         
-    plt.colorbar()
+    plt.clim(0,30)
+    cb = plt.colorbar(pad=0.07)
+    cb.set_label('Cloud Fraction [%]')
     plt.xlim(-180, 180)
+    plt.grid()
     plt.title(title)
+    plt.tight_layout()
 
 
 def main(infile='series_40.npz'):
@@ -76,8 +81,8 @@ def main(infile='series_40.npz'):
 
     for ialtmin in 0, 1, 2:
 
-        cf = 1. * vcm_avg[ialtmin] / nprof_avg
-        pcolor_meridhov(time_avg, lon, cf, 'clouds above > %2d km - Average year' % (altmin[ialtmin]))
+        cf = 100. * vcm_avg[ialtmin] / nprof_avg
+        pcolor_meridhov(time_avg, lon, cf, 'clouds above %2d km - Average year' % (altmin[ialtmin]))
         nice.savefig(infile[:-4] + '_avg_above%02dkm.png' % (altmin[ialtmin]))
 
         pcolor_meridhov(time, lon, cf_anom[ialtmin], 'clouds above > %2d km - Anomaly' % (altmin[ialtmin]), anom=True)

@@ -6,14 +6,16 @@
 import glob
 import dimarray as da
 
-def main(mask = 'out/200912/*nc4'):
+def main(mask = 'out/200702/*nc4'):
 
     files = glob.glob(mask)
 
     for f in files:
         d = da.read_nc(f)
-        cf = 100. * d['cal333+cal05+cal20+cal80+csat_cprof'].sum() / d['nprof'].sum()
-        print f, d['nprof'].sum(), d['cal333+cal05+cal20+cal80+csat_cprof'].sum(), cf
+        print f
+        for n in 'cal333+cal05+cal20+cal80+csat_cprof', 'cal333+cal05+cal20+cal80_cprof':
+            cf = 100. * d[n].sum() / d['nprof'].sum()
+            print '    ', n, d['nprof'].sum(), d[n].sum(), cf
     
     
 

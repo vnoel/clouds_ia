@@ -62,10 +62,16 @@ def main():
     cprof = npz['cprof']
     lat = npz['lat']
 
+
     dtnum = mdates.date2num(dt)
 
     nprof = nprof[0:len(dt),:]
     cprof = cprof[0:len(dt),:]
+
+    nprofl = np.sum(nprof, axis=0)
+    cfl = 100.*np.sum(cprof, axis=0)/nprofl
+    plt.figure()
+    plt.plot(lat, cfl)
     
     nproft = np.sum(nprof, axis=1)
     cft = 100.*np.sum(cprof, axis=1)/nproft

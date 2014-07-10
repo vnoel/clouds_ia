@@ -55,9 +55,12 @@ def main():
     dt = npz['datetimes']
     nprof = npz['nprof']
     cprof = npz['cprof']
+    lat = npz['lat']
 
-    nprof = nprof[0:len(dt),:]
-    cprof = cprof[0:len(dt),:]
+    idx = (lat > -82) & (lat < 82)
+    nprof = nprof[0:len(dt),idx]
+    cprof = cprof[0:len(dt),idx]
+    lat = lat[idx]
     nprof = nprof.sum(axis=1)
     cprof = cprof.sum(axis=1)
 
@@ -70,7 +73,7 @@ def main():
     cf = 100.*cprof/nprof
     badidx = (cf < 57) | (nprof < 1.7e7)
 
-    plt.figure(figsize=[20,4])
+    plt.figure(figsize=[24,4])
     plt.plot(dt, cf)
     plt.plot(dt[badidx], cf[badidx], 'r*')
     plt.grid()
@@ -93,13 +96,29 @@ def main():
     cfanom = anomalies(avgdt, avgcf, dt, cf)
     cfanom = np.ma.masked_where(badidx, cfanom)
     
-    plt.figure(figsize=[20,4])
+    plt.figure(figsize=[24,4])
     plt.plot(dt, cfanom)
     plt.fill_between(dt, 0, cfanom, alpha=0.2)
     plt.grid()
     plt.ylabel('Cloud Fraction Anomalies [%]')
     plt.title('2006-2014')
-    nice.savefig('cf.png')
+    nice.savefig('cf_anom.png')
+
+
+    plt.figure(figsize=[24,4])
+    plt.plot(dt, cf, label='Cloud Fraction')
+    plt.plot(dt, cf - cfanom, color='grey', label='Average 2006-2014')
+    cfavg = cf - cfanom
+    cfred = np.ma.masked_where(cfanom < 0, cf)
+    plt.fill_between(dt, cfred, cfred-cfanom, color='red', alpha=0.2)
+    cfblue = np.ma.masked_where(cfanom > 0, cf)
+    plt.fill_between(dt, cfblue, cfblue-cfanom, color='blue', alpha=0.2)
+    plt.grid()
+    plt.legend()
+    plt.ylabel('Cloud Fraction [%]')
+    plt.title('2006-2014')
+    nice.savefig('cf_anom_bluered.png')
+
 
     plt.show()
 

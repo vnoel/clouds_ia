@@ -12,20 +12,25 @@ import niceplots as nice
 
 def pcolor_zonal(x, y, vcmarray, title=None):
 
-    plt.contourf(x, y, vcmarray.T, np.r_[0:0.8:0.05])
+    z = vcmarray.copy()
+    z = np.ma.masked_where(z==0, z)
+    plt.contourf(x, y, z.T, np.r_[0:0.8:0.05])
     plt.colorbar()
     if title is not None:
-        plt.title(title)
+        plt.title(title[10:-4])
     plt.clim(0,0.8)
-    plt.xlim(-82,82)
     plt.xticks(np.r_[-90:90+30:30])
     ctop = tropic_width.cloud_cover_top(y, vcmarray, 0.05)
     latup, latdown, ceiling, height = tropic_width.tropic_width3(x, y, vcmarray)
-    plt.axvline(x=latup, ls='--', color='w')
-    plt.axvline(x=latdown, ls='--', color='w')
-    plt.axhline(y=ceiling, ls='--')
-    plt.axhline(y=height, ls='--')
+    plt.axvline(x=latup, ls='--', color='grey')
+    plt.axvline(x=latdown, ls='--', color='grey')
+    plt.axhline(y=ceiling, ls='--', color='grey')
+    plt.axhline(y=height, ls='--', color='grey')
     plt.plot(x, ctop, ls='--', color='w', alpha=0.5)
+    plt.xlim(-82,82)
+    plt.ylim(0, 20) 
+    plt.ylabel('Altitude [km]')   
+    plt.xlabel('Latitude')
 
 
 def cf_zonal(filename):
