@@ -60,18 +60,12 @@ def vcm_dataset_from_l2_orbit(filename):
     tai_time = l2.time()
     nl, base, top = l2.layers()
     ltype = l2.layer_type()
-    nprof1 = tai_time.shape[0]
+    l2.close()
     
     vcm = vcm_from_layers(nl, base, top, ltype)
     tai_time, lon, lat, vcm = downscale_333m_to_1km(tai_time, lon, lat, vcm)
-    nprof2 = tai_time.shape[0]
 
-    time_axis = ('tai_time', tai_time)
-    alt_axis = ('altitude', vcm_alt.astype('float32'))
-    dset = da.Dataset()    
-    dset['cal333'] = da.DimArray(vcm, (time_axis, alt_axis))
-    dset['lon'] = da.DimArray(lon, (time_axis,))
-    dset['lat'] = da.DimArray(lat, (time_axis,))
+    dset = {'time':tai_time, 'altitude':vcm_alt, 'cal333':vcm, 'lon':lon, 'lat':lat}
 
     return dset
     
