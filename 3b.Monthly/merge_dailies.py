@@ -15,9 +15,12 @@ def dayfiles_sum_dataset(files):
 
     for name in names:
         data = da.read_nc(files[0], name)
-        for f in files[1:]:
-            data += da.read_nc(f, name)
         aggregated[name] = data
+        prev = aggregated[name].sum()
+        for f in files[1:]:
+            aggregated[name] += da.read_nc(f, name)
+            assert aggregated[name].sum() > prev
+            prev = aggregated[name].sum()
         
     return aggregated
 
