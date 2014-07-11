@@ -63,7 +63,10 @@ def remap_profiles(values, n1, n2, nprof333):
     
     out = np.zeros([nprof333, values.shape[1]], dtype='int8')
     for i in np.r_[0:values.shape[0]]:
-        out[n1[i]:n2[i],:] = values[i,:]
+        # every cloudy profile at 5km resolution is equal to 3 cloudy 333m profiles at 1km resolution
+        # (tricky...)
+        out[n1[i]:n2[i],:] = values[i,:] * 3
+        
     return out
 
 
@@ -75,13 +78,14 @@ def reindex_vcms(vcm, vcm5, vcmc):
     
     nprof5 = mintime5.shape[0]
     time333 = vcm['cal333'].labels[0]
+    nprof333 = time333.shape[0]
     
     # first find 333m profiles indexes for a given 5km profile
     n1, n2 = np.zeros(nprof5, 'int16'), np.zeros(nprof5, 'int16')
     n = 0
     for i in np.r_[0:nprof5]:
         n1[i] = n
-        while time333[n] < maxtime5[i]:
+        while n < nprof333 and time333[n] < maxtime5[i]:
             n += 1
         n2[i] = n-1
 
@@ -126,9 +130,9 @@ def vcm_dataset_from_l2_orbits(cal333, cal5, csat, slow=False):
         return None
     
     print 'Creating vcm from'
-    print cal333
-    print cal5
-    print csat
+    print cal333.split('/')[-1]
+    print cal5.split('/')[-1]
+    print csat.split('/')[-1]
     
     vcm = orbit_vcm_cal333.vcm_dataset_from_l2_orbit(cal333)
     vcm5 = orbit_vcm_cal5.vcm_dataset_from_l2_orbit(cal5)
@@ -136,7 +140,7 @@ def vcm_dataset_from_l2_orbits(cal333, cal5, csat, slow=False):
     if vcm is None or vcm5 is None:
         return None
     # make sure the 333m file has more profiles than the 5km one
-    assert vcm['cal333'].shape[0] > (vcm5['cal05'].shape[0] * 10)    
+    assert vcm['cal333'].shape[0] > (vcm5['cal05'].shape[0] * 3)
     
     vcmc = orbit_vcm_csat.vcm_from_geoprof_file(csat, vcm['cal333'].labels[1])
     # here vcmc can be None if there is no file
@@ -152,30 +156,60 @@ def vcm_dataset_from_l2_orbits(cal333, cal5, csat, slow=False):
     return vcm
     
 
-def vcm_file_from_333_orbit(cal333_file, where='./'):
-    '''
-    saves a vcm dataset in a file containing cloud masks from calipso and cloudsat data,
-    based on a calipso 333m orbit file.
-    '''
-    
+def vcm_file_from_333_orbits(date, cal333_files, where='./'):
     import os
     
-    y, m, d, orbit_id = _find_orbit_id(cal333_file)
-    geoprof_file = _find_geoprof_file(y, m, d, orbit_id)
-    cal5_file = _find_cal5_file(y, m, d, orbit_id)
-
-    vcm = vcm_dataset_from_l2_orbits(cal333_file, cal5_file, geoprof_file)
-    if vcm is None:
-        return
-    
-    outname = 'vcm_' + orbit_id + '.nc4'
+    daily_vcm = None
+    for cal333_file in cal333_files:
+        vcm, orbit_id = vcm_from_333_orbit(cal333_file)
+        if vcm is None:
+            continue
+        if daily_vcm is None:
+            daily_vcm = vcm
+        else:
+            daily_vcm = da.concatenate_ds([daily_vcm, vcm])
     
     # check if path exists, fix it if not
     if not os.path.isdir(where):
         print 'Creating dir ' + where
         os.mkdir(where)
 
+    outname = 'vcm_%04d-%02d-%02d_v2.0.nc4' % (date.year, date.month, date.day)
+    print 'Saving ', where + outname
+    daily_vcm.write_nc(where + outname, mode='w', zlib=True, complevel=9)
+        
+
+def vcm_file_from_333_orbit(date, cal333_file, where='./'):
+
+    import os
+    
+    vcm, orbit_id = vcm_from_333_orbit(cal333_file)
+    if vcm is None:
+        return
+    
+    outname = 'vcm_' + orbit_id + '_v2.0.nc4'
+    
+    # check if path exists, fix it if not
+    if not os.path.isdir(where):
+        print 'Creating dir ' + where
+        os.mkdir(where)
+
+    print 'Saving ', where + outname
     vcm.write_nc(where + outname, mode='w', zlib=True, complevel=9)
+    
+
+def vcm_from_333_orbit(cal333_file):
+    '''
+    creates a vcm dataset containing cloud masks from calipso and cloudsat data,
+    based on a calipso 333m orbit file.
+    '''
+    
+    y, m, d, orbit_id = _find_orbit_id(cal333_file)
+    geoprof_file = _find_geoprof_file(y, m, d, orbit_id)
+    cal5_file = _find_cal5_file(y, m, d, orbit_id)
+
+    vcm = vcm_dataset_from_l2_orbits(cal333_file, cal5_file, geoprof_file)
+    return vcm, orbit_id
     
 
 # TESTS

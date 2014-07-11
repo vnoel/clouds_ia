@@ -15,7 +15,7 @@ nalt = vcm_alt.shape[0]
 havgs_vcm = [5, 20, 80]
 
 
-def vcm_from_layers(nl, base, top, havg, ltype, only_havg=None):
+def vcm_from_layers(nl, base, top, havg, ltype, tropo, only_havg=None):
     
     nprof = base.shape[0]
     vcm = np.zeros([nprof, nalt], dtype='int8')
@@ -29,17 +29,18 @@ def vcm_from_layers(nl, base, top, havg, ltype, only_havg=None):
     # keep only requested havg
     if only_havg is not None:
         basecopy[havg != only_havg] = -9999.
+
+    # remove layer that overlap with stratosphere
+    for i in xrange(nprof):
+        for j in xrange(nl[i]):
+            if top[i,j] > tropo[i]:
+                basecopy[i,j] = -9999.
     
     for i in xrange(nprof):
-        
-        if nl[i] == 0:
-            continue
-        
-        for j in xrange(nl[i]):
-            
-            if basecopy[i,j] < 0:
-                continue
 
+        if basecopy[i,j] < 0:
+            continue
+        for j in xrange(nl[i]):
             idx = (vcm_alt >= basecopy[i,j]) & (vcm_alt < top[i,j])
             vcm[i, idx] = 1
     
@@ -59,6 +60,9 @@ def vcm_dataset_from_l2_orbit(filename):
     havg = l2.horizontal_averaging()
     ltype = l2.layer_type()
     tai_time_min, tai_time_max = l2.time_bounds()
+    tropo = l2.tropopause_height()
+    
+    tropo[lat < -60] = 12
     
     vertical_cloud_masks = da.Dataset()
     
@@ -66,7 +70,7 @@ def vcm_dataset_from_l2_orbit(filename):
     alt_axis = ('altitude', vcm_alt)
     
     for havg_vcm in havgs_vcm:
-        vcm = vcm_from_layers(nl, base, top, havg, ltype, only_havg=havg_vcm)
+        vcm = vcm_from_layers(nl, base, top, havg, ltype, tropo, only_havg=havg_vcm)
         vcm_name = 'cal%02d' % (havg_vcm)
         vertical_cloud_masks[vcm_name] = da.DimArray(vcm, (time_axis, alt_axis))
     

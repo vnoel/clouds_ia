@@ -18,17 +18,8 @@ def vcm_from_layers(nl, base, top, ltype):
     vcm = np.zeros([nprof, nalt], dtype='int8')
     basecopy = base.copy()
         
-    # clean up unwanted layers first
-    # for clouds, feature type == layer_type == 2
-    #basecopy[ltype != 2] = -9999.
-    
     for i in xrange(nprof):
-        
-        for j in xrange(nl[i]):
-            
-            if basecopy[i,j] < 0:
-                continue
-
+        for j in xrange(nl[i]):            
             idx = (vcm_alt >= basecopy[i,j]) & (vcm_alt < top[i,j])
             vcm[i, idx] = 1
     
@@ -37,9 +28,28 @@ def vcm_from_layers(nl, base, top, ltype):
     return vcm
 
 
+def downscale_333m_to_1km(time, lon, lat, vcm):
+    
+    # the time of a 1km profile is the time of the first 333m profile used for aggregation
+    
+    nprof = time.shape[0]
+    nprof2 = np.int(1. * nprof / 3.)
+    vcm2 = np.zeros([nprof2, nalt], dtype='int8')
+    lon2 = np.zeros([nprof2])
+    lat2 = np.zeros([nprof2])
+    time2 = np.zeros([nprof2])
+    for i in xrange(nprof2):
+        i2 = i * 3
+        time2[i] = time[i2]
+        lon2[i] = np.mean(lon[i2:i2+3])
+        lat2[i] = np.mean(lat[i2:i2+3])
+        vcm2[i] = np.sum(vcm[i2:i2+3,:], axis=0)
+    return time2, lon2, lat2, vcm2
+
+
 def vcm_dataset_from_l2_orbit(filename):
     
-    print 'Creating vcm from l2 file ' + filename
+    # print 'Creating vcm from l2 file ' + filename
     
     try:
         l2 = level2.Cal2(filename)
@@ -50,18 +60,20 @@ def vcm_dataset_from_l2_orbit(filename):
     tai_time = l2.time()
     nl, base, top = l2.layers()
     ltype = l2.layer_type()
-    
-    vertical_cloud_masks = da.Dataset()
-    
-    time_axis = ('tai_time', tai_time)
-    alt_axis = ('altitude', vcm_alt.astype('float32'))
+    nprof1 = tai_time.shape[0]
     
     vcm = vcm_from_layers(nl, base, top, ltype)
-    vertical_cloud_masks['cal333'] = da.DimArray(vcm, (time_axis, alt_axis))
-    vertical_cloud_masks['lon'] = da.DimArray(lon.astype('float32'), (time_axis,))
-    vertical_cloud_masks['lat'] = da.DimArray(lat.astype('float32'), (time_axis,))
+    tai_time, lon, lat, vcm = downscale_333m_to_1km(tai_time, lon, lat, vcm)
+    nprof2 = tai_time.shape[0]
 
-    return vertical_cloud_masks
+    time_axis = ('tai_time', tai_time)
+    alt_axis = ('altitude', vcm_alt.astype('float32'))
+    dset = da.Dataset()    
+    dset['cal333'] = da.DimArray(vcm, (time_axis, alt_axis))
+    dset['lon'] = da.DimArray(lon, (time_axis,))
+    dset['lat'] = da.DimArray(lat, (time_axis,))
+
+    return dset
     
 
 # test functions
@@ -69,10 +81,6 @@ def vcm_dataset_from_l2_orbit(filename):
     
 def test_vcm_nprof():
     
-    import calipso_local
-    import glob
-    
-    out = './test.out'
     test333 = '/homedata/noel/Data/333mCLay/2008/2008_01_01/CAL_LID_L2_333mCLay-ValStage1-V3-01.2008-01-01T01-30-23ZN.hdf'
     vcm = vcm_dataset_from_l2_orbit(test333)
     nprof = vcm['lon'].shape[0]
