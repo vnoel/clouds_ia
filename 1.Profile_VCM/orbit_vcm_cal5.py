@@ -30,17 +30,17 @@ def vcm_from_layers(nl, base, top, havg, ltype, tropo, only_havg=None):
     if only_havg is not None:
         basecopy[havg != only_havg] = -9999.
 
+    tropo += 1.
     # remove layer that overlap with stratosphere
     for i in xrange(nprof):
         for j in xrange(nl[i]):
-            if top[i,j] > tropo[i]:
+            if top[i,j] > (tropo[i]):
                 basecopy[i,j] = -9999.
     
     for i in xrange(nprof):
-
-        if basecopy[i,j] < 0:
-            continue
         for j in xrange(nl[i]):
+            if basecopy[i,j] < 0:
+                continue
             idx = (vcm_alt >= basecopy[i,j]) & (vcm_alt < top[i,j])
             vcm[i, idx] = 1
     
@@ -61,10 +61,12 @@ def vcm_dataset_from_l2_orbit(filename):
     ltype = l2.layer_type()
     tai_time_min, tai_time_max = l2.time_bounds()
     tropo = l2.tropopause_height()
+    l2.close()
     
-    tropo[lat < -60] = 12
+    tropo[lat < -60] = 11.
+    tropo[lat > 60] = 11.
     
-    vertical_cloud_masks = da.Dataset()
+    dset = da.Dataset()
     
     time_axis = ('tai_time', tai_time)
     alt_axis = ('altitude', vcm_alt)
@@ -72,14 +74,14 @@ def vcm_dataset_from_l2_orbit(filename):
     for havg_vcm in havgs_vcm:
         vcm = vcm_from_layers(nl, base, top, havg, ltype, tropo, only_havg=havg_vcm)
         vcm_name = 'cal%02d' % (havg_vcm)
-        vertical_cloud_masks[vcm_name] = da.DimArray(vcm, (time_axis, alt_axis))
+        dset[vcm_name] = da.DimArray(vcm, (time_axis, alt_axis))
     
-    vertical_cloud_masks['lon'] = da.DimArray(lon, (time_axis,))
-    vertical_cloud_masks['lat'] = da.DimArray(lat, (time_axis,))
-    vertical_cloud_masks['time_min'] = da.DimArray(tai_time_min, (time_axis,))
-    vertical_cloud_masks['time_max'] = da.DimArray(tai_time_max, (time_axis,))
+    dset['lon'] = da.DimArray(lon, (time_axis,))
+    dset['lat'] = da.DimArray(lat, (time_axis,))
+    dset['time_min'] = da.DimArray(tai_time_min, (time_axis,))
+    dset['time_max'] = da.DimArray(tai_time_max, (time_axis,))
 
-    return vertical_cloud_masks
+    return dset
     
     
 def vcm_file_from_l2_orbit(filename, where='./'):
