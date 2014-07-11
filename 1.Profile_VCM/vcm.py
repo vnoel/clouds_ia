@@ -8,14 +8,21 @@ import numpy as np
 
 
 class VCM(object):
+
+    '''
+    it is possible to read several orbit files at a time, using e.g. a glob pattern
+    v = VCM('out/200701/vcm_2007-01-01T*_v2.0.nc4')
+    or from a filelist
+    v = VCM(glob.glob('out/200701/vcm_2007-01-01T*_v2.0.nc4'))
+    '''
     
     def __init__(self, filename):
 
         self.filename = filename
-        self.lon = da.read_nc(filename, 'lon').values
-        self.lat = da.read_nc(filename, 'lat').values
+        self.lon = da.read_nc(filename, 'lon', axis='tai_time').values
+        self.lat = da.read_nc(filename, 'lat', axis='tai_time').values
         self.data = da.Dataset()
-        self.data['cal333'] = da.read_nc(filename, 'cal333')
+        self.data['cal333'] = da.read_nc(filename, 'cal333', axis='tai_time')
         self.altitude = self.data['cal333'].altitude
         
     
@@ -33,24 +40,24 @@ class VCM(object):
             # it does *not* happen when the are no colocated profile, as far as I know.
             # need to do sthing better than that ?
             if names[0] not in self.data:
-                self.data[names[0]] = da.read_nc(self.filename, names[0])
+                self.data[names[0]] = da.read_nc(self.filename, names[0], axis='tai_time')
             output = np.clip(self.data[names[0]], 0, 1)
             for name in names[1:]:
                 if name not in self.data:
-                    self.data[name] = da.read_nc(self.filename, name)
+                    self.data[name] = da.read_nc(self.filename, name, axis='tai_time')
                 if 'csat' in name:
                     self.data[name] = np.clip(self.data[name], 0, 1)
                 output += self.data[name]
             output = np.clip(output.values, 0, 1)
         else:
             if mask not in self.data:
-                self.data[mask] = da.read_nc(self.filename, mask)
+                self.data[mask] = da.read_nc(self.filename, mask, axis='tai_time')
             output = np.clip(self.data[mask].values, 0, 1)
 
         return output
 
 
-def aggregate_arrays_from_files(filemask, array_names, summed_along=None):
+def sum_arrays_from_files(filemask, array_names, summed_along=None):
     
     import glob
     
