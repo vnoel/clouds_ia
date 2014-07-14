@@ -19,8 +19,11 @@ def sum_dailies(files):
 def dayfiles_to_windows(files, outfile):
     
     window_sum = sum_dailies(files)
-    print 'Saving ' + outfile
-    print '   cf = ', 100. * np.sum(window_sum['cal333+cal05+cal20+cal80+csat_cprof']) / np.sum(window_sum['nprof'])
+    #print 'Saving ' + outfile
+    #print '   cf = ', 100. * np.sum(window_sum['cal333+cal05+cal20+cal80+csat_cprof']) / np.sum(window_sum['nprof'])
+    cf = 100. * np.sum(window_sum['cal333+cal05+cal20+cal80+csat_cprof'])/np.sum(window_sum['nprof'])
+    if cf < 60:
+        print 'WARNING: cf < 60%'
     window_sum.write_nc(outfile, 'w')
 
 
