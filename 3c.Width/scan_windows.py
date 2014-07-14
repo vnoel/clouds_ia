@@ -12,41 +12,14 @@ import glob
 vcm_mins = [0.05, 0.15, 0.25, 0.35]
 
 
-def read_vars(f):
-    try:
-        vcm = da.read_nc(f, 'cal333+cal05+cal20+cal80+csat')
-        nprof = da.read_nc(f, 'cal333+cal05+cal20+cal80+csat_cprof')
-    except KeyError:
-        return None, None
-        
-    return vcm, nprof
-
-
-def compute_cf(vcm, nprof):
-
-    cf_lat = 1. * vcm.values.T / nprof.values
-    cf_lat = np.ma.masked_invalid(cf_lat.T)
-
-    return cf_lat
-
-
-def test1(f):
-    vcm, nprof = read_vars(f)
-    cf_lat = compute_cf(vcm, nprof)
-    return vcm, cf_lat
-    
-
-def month_tropic_test(f):
-    
-    vcm, cf_lat = test1(f)
-    print vcm.shape, cf_lat.shape
-    tropic_range = tropic_width.tropic_width3(vcm.lat, vcm.altitude, cf_lat, 0.05)
-    
-
 def month_tropic_width(f):
 
-    vcm, nprof = read_vars(f)
-    cf_lat = compute_cf(vcm, nprof)
+    dset = da.read_nc(['cal333+cal05+cal20+cal80+csat', 'cal333+cal05+cal20+cal80+csat_cprof'])
+    vcm = dset['cal333+cal05+cal20+cal80+csat']
+    nprof = dset['nprof']
+
+    cf_lat = np.ma.masked_invalid(1. * vcm.values.T / nprof.values)
+    cf_lat = cf_lat.T
         
     tropic_range = dict()
     for vcm_min in vcm_mins:
@@ -96,6 +69,7 @@ def scan_years(years, window=40):
             print datetimes[-1], tropic_min[0.05][-1], tropic_max[0.05][-1]
 
     np.savez('tropic_width_%02d.npz' % window, tmin=tropic_min, tmax=tropic_max, datetimes=datetimes)
+
 
 def main():
     
