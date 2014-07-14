@@ -7,16 +7,16 @@ import numpy as np
 import dimarray as da
 import vcm
 
-latstep = 0.01
+latstep = 0.1
 latbins = np.r_[-82:82+latstep:latstep]
 
-# vcm_names = 'cal333', 'cal333+cal05', 'cal333+cal05+cal20', 'cal333+cal05+cal20+cal80', 'cal333+cal05+cal20+cal80+csat'
 vcm_names = ['cal333+cal05+cal20+cal80+csat', 'cal333+cal05+cal20+cal80']
 
 def zone_vcm_from_vcm_orbit(vcm_orbit, latbins=latbins):
     
     # read data
-    v = vcm.VCM(vcm_orbit)
+    print 'opening ' + vcm_orbit
+    v = vcm.VCM(vcm_orbit, verbose=False)
     
     nlat = latbins.shape[0]
     nalt = v.altitude.shape[0]
@@ -25,33 +25,28 @@ def zone_vcm_from_vcm_orbit(vcm_orbit, latbins=latbins):
 
     # ilatbins = vector with nprof indexes containing bin numbers
     ilatbins = np.digitize(v.lat, latbins)
+    lat_axes = da.Axis(latbins[:-1], 'lat')
 
-    nprof = np.zeros([nlat], dtype='uint16')
-    h, xx = np.histogram(v.lat, bins=latbins)
-    nprof[:-1] = h
-    out['nprof'] = da.DimArray(nprof, labels=[latbins,], dims=['lat',])
-    ialt1 = (v.altitude > 1)
+    nprof, xx = np.histogram(v.lat, bins=latbins)
+    out['nprof'] = da.DimArray(nprof, [lat_axes])
+    # ialt1 = np.where(v.altitude > 1)[0]
+
+    alt_axes = da.Axis(v.altitude, 'altitude')
 
     for name in vcm_names:
         
         this_vcm = v.get_vcm(name)
-        zone_vcm = np.zeros([nlat, nalt], dtype='uint16')
-        cprof = np.zeros([nlat], dtype='uint16')
-        
-        prof_is_cloudy = (np.sum(this_vcm, axis=1) > 0)
-        h, xx = np.histogram(v.lat, bins=latbins, weights=1 * prof_is_cloudy)
-        cprof[:-1] = h
-        out[name + '_cprof'] = da.DimArray(cprof, labels=[latbins], dims=['lat',])
+        zone_vcm = np.zeros([nlat-1, nalt], dtype='uint16')
         
         # prof_is_cloudy = (np.sum(this_vcm[:,ialt1], axis=1) > 0)
-        # h, xx = np.histogram(v.lat, bins=latbins, weights=1 * prof_is_cloudy)
-        # cprof[:-1] = h
-        # out[name + '_cprof1km'] = da.DimArray(cprof, labels=[latbins], dims=['lat',])
+        prof_is_cloudy = (np.sum(this_vcm, axis=1) > 0)
+        cprof, xx = np.histogram(v.lat, bins=latbins, weights=1. * prof_is_cloudy)
+        out[name + '_cprof'] = da.DimArray(cprof, [lat_axes])
         
-        for i,ilatbin in enumerate(ilatbins):
+        for i,ilatbin in enumerate(ilatbins[:-1]):
             if prof_is_cloudy[i]:
-                np.add(zone_vcm[ilatbin,:], this_vcm[i,:], out=zone_vcm[ilatbin,:])
-        out[name] = da.DimArray(zone_vcm, labels=[latbins, v.altitude], dims=['lat', 'altitude'], longname='Number of cloudy points in lat-z bin, considering ' + name)
+                zone_vcm[ilatbin,:] = np.take(this_vcm, i, axis=0) + np.take(zone_vcm, ilatbin, axis=0)
+        out[name] = da.DimArray(zone_vcm, [lat_axes, alt_axes], longname='Number of cloudy points in lat-z bin, considering ' + name)
     
     return out
 
@@ -59,19 +54,8 @@ def zone_vcm_from_vcm_orbit(vcm_orbit, latbins=latbins):
 def zone_vcm_file_from_vcm_orbits(vcm_orbits, outname, where='./out'):
     
     import os
-    
-    dataset = None
-    for vcm_orbit in vcm_orbits:
-        out = zone_vcm_from_vcm_orbit(vcm_orbit)
-        if out is None:
-            continue
-        if dataset is None:
-            dataset = out
-            fields = dataset.keys()
-        else:
-            for field in fields:
-                dataset[field] += out[field]
-        
+
+    dataset = zone_vcm_from_vcm_orbit(vcm_orbits)
     if dataset is None:
         return
         
