@@ -16,14 +16,17 @@ class VCM(object):
     v = VCM(glob.glob('out/200701/vcm_2007-01-01T*_v2.0.nc4'))
     '''
     
-    def __init__(self, filename):
+    def __init__(self, filename, verbose=True):
+
+        import netCDF4
 
         self.filename = filename
-        self.lon = da.read_nc(filename, 'lon', axis='tai_time').values
-        self.lat = da.read_nc(filename, 'lat', axis='tai_time').values
-        self.data = da.Dataset()
-        self.data['cal333'] = da.read_nc(filename, 'cal333', axis='tai_time')
-        self.altitude = self.data['cal333'].altitude
+        self.verbose = verbose
+        dimarrays = da.read_nc(filename, ['lon', 'lat', 'cal333'], axis='tai_time', verbose=verbose)
+        self.altitude = dimarrays['cal333'].altitude
+        self.lon = dimarrays['lon'].values
+        self.lat = dimarrays['lat'].values
+        self.data = {'cal333':dimarrays['cal333'].values}
         
     
     def get_vcm(self, mask):
@@ -32,53 +35,41 @@ class VCM(object):
         
         if '+' in mask:
             names = mask.split('+')
-
-            # this is waaaay slower
-            # output = np.sum([self.data[name].values for name in names], axis=0)
+            
+            to_read = []
+            for name in names:
+                if name not in self.data:
+                    to_read.append(name)
+            ds = da.read_nc(self.filename, to_read, axis='tai_time', verbose=self.verbose)
+            for name in to_read:
+                self.data[name] = ds[name].values
+            if 'csat' in names:
+                self.data['csat'] = np.clip(self.data['csat'], 0, 3)
 
             # negative data can happen e.g. for csat when there are no files.
             # it does *not* happen when the are no colocated profile, as far as I know.
             # need to do sthing better than that ?
-            if names[0] not in self.data:
-                self.data[names[0]] = da.read_nc(self.filename, names[0], axis='tai_time')
-            output = np.clip(self.data[names[0]], 0, 1)
+            output = self.data[names[0]]
             for name in names[1:]:
-                if name not in self.data:
-                    self.data[name] = da.read_nc(self.filename, name, axis='tai_time')
-                if 'csat' in name:
-                    self.data[name] = np.clip(self.data[name], 0, 1)
                 output += self.data[name]
-            output = np.clip(output.values, 0, 1)
         else:
             if mask not in self.data:
-                self.data[mask] = da.read_nc(self.filename, mask, axis='tai_time')
-            output = np.clip(self.data[mask].values, 0, 1)
+                self.data[mask] = da.read_nc(self.filename, mask, axis='tai_time').values
+            output = self.data[mask]
+
+        output = np.clip(output, 0, 3)
 
         return output
 
 
-def sum_arrays_from_files(filemask, array_names, summed_along=None):
+def sum_arrays_from_files(filemask, array_names=None):
     
     import glob
     
-    aggregated = dict()
-    
-    for name in array_names:
-
-        print 'Aggregating array %s from %d files' % (name, len(filemask))
-        for f in filemask:
-            data = da.read_nc(f, name)
-            if name not in aggregated:
-                aggregated[name] = 1. * data
-            else:
-                aggregated[name] += data
-        #
-        # data = da.read_nc(filemask, name, axis='orbit')
-        # if summed_along:
-        #     data = data.sum(axis=summed_along)
-        # aggregated[name] = data.sum(axis='orbit')
-    
-    data = [aggregated[array_name] for array_name in array_names]
-    
-    return data
+    if array_names is None:
+        datasets = da.read_nc(filemask, axis='day')
+    else:
+        datasets = da.read_nc(filemask, array_names, axis='day')
+    datasets = datasets.sum(axis='day')
+    return datasets
     
