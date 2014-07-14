@@ -12,32 +12,16 @@ import glob
 vcm_mins = [0.05, 0.15, 0.25, 0.35]
 
 
-def read_vars(f):
-    print f
-    try:
-        vcm = da.read_nc(f, 'cal333+cal05+cal20+cal80+csat')
-        cprof = da.read_nc(f, 'cal333+cal05+cal20+cal80+csat_cprof')
-        nprof = da.read_nc(f, 'nprof')
-    except KeyError:
-        return None, None, None
-        
-    return vcm, cprof, nprof
-
-
 def compute_cf(vcm, cprof, nprof):
 
-    cf_lat = 1. * vcm.values.T / cprof.values
-    cf_lat = np.ma.masked_invalid(cf_lat.T)
-
-    cf_lat2 = 1. * vcm.values.T / nprof.values
-    cf_lat2 = np.ma.masked_invalid(cf_lat2.T)
-
+    cf_lat = np.ma.masked_invalid(1. * vcm.values.T / cprof.values).T
+    cf_lat2 = np.ma.masked_invalid(1. * vcm.values.T / nprof.values).T
     return cf_lat, cf_lat2
 
 
 def window_cloud_ceiling(f):
-
-    vcm, cprof, nprof = read_vars(f)
+    dset = da.read_nc(f, ['cal333+cal05+cal20+cal80+csat', 'cal333+cal05+cal20+cal80+csat_cprof', 'nprof'])
+    vcm, cprof, nprof = dset['cal333+cal05+cal20+cal80+csat'], dset['cal333+cal05+cal20+cal80+csat_cprof'], dset['nprof']
     cf_lat, cf_lat2 = compute_cf(vcm, cprof, nprof)
         
     ceiling = tropic_width.cloud_cover_top(vcm.altitude, cf_lat)
