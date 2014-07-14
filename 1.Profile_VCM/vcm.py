@@ -18,8 +18,6 @@ class VCM(object):
     
     def __init__(self, filename, verbose=True):
 
-        import netCDF4
-
         self.filename = filename
         self.verbose = verbose
         dimarrays = da.read_nc(filename, ['lon', 'lat', 'cal333'], axis='tai_time', verbose=verbose)
@@ -36,19 +34,16 @@ class VCM(object):
         if '+' in mask:
             names = mask.split('+')
             
-            to_read = []
-            for name in names:
-                if name not in self.data:
-                    to_read.append(name)
+            to_read = [name for name in names if name not in self.data]
             ds = da.read_nc(self.filename, to_read, axis='tai_time', verbose=self.verbose)
             for name in to_read:
                 self.data[name] = ds[name].values
             if 'csat' in names:
+                # negative data can happen e.g. for csat when there are no files.
+                # it does *not* happen when the are no colocated profile, as far as I know.
+                # need to do sthing better than that ?
                 self.data['csat'] = np.clip(self.data['csat'], 0, 3)
 
-            # negative data can happen e.g. for csat when there are no files.
-            # it does *not* happen when the are no colocated profile, as far as I know.
-            # need to do sthing better than that ?
             output = self.data[names[0]]
             for name in names[1:]:
                 output += self.data[name]
@@ -63,8 +58,6 @@ class VCM(object):
 
 
 def sum_arrays_from_files(filemask, array_names=None):
-    
-    import glob
     
     if array_names is None:
         datasets = da.read_nc(filemask, axis='day')
