@@ -54,15 +54,6 @@ def main(year=2007, month=None, day=None, where='out/'):
     process_vcm_orbits_period(start, end, where)
 
 
-def test_day_grid_for_orbits():
-    
-    import os
-    
-    orbit_files = glob.glob('in/200701/vcm_2007-07-07*.nc4')
-    main(2007,1,1,where='test.out/')
-    assert os.path.isfile('test.out/200701/vcm_zonal_2007-01-01.nc4')
-        
-
 if __name__=='__main__':
     import plac
     plac.call(main)

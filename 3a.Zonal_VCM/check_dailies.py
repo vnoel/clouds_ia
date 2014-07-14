@@ -6,9 +6,11 @@
 import glob
 import dimarray as da
 
-def main(mask = 'out/200702/*nc4'):
+def main(mask='out/200607/*.nc4'):
 
+    print mask
     files = glob.glob(mask)
+    print len(files)
 
     for f in files:
         d = da.read_nc(f)

@@ -20,21 +20,28 @@ def pcolor_cf(x, y, vcmarray, title=None):
     plt.xlim(-82,82)
 
 
-def show_files(files):
+def show_files(files, title):
     
     dset = vcm.sum_arrays_from_files(files)
     
-    nprof = dset['nprof'] * 3.
+    nprof = dset['nprof']
     cprof = dset['cal333+cal05+cal20+cal80+csat']
     cf_lat = np.ma.masked_invalid(100. * cprof.values.T / nprof.values)
     cf_lat = cf_lat.T
     
-    pcolor_cf(cprof.lat, cprof.altitude, cf_lat, 'Cloud fraction ')
+    if title is None:
+        if '*' in files:
+            title = files
+        else:
+            title = files[0]
+    title = 'Cloud fraction ' + title
+    pcolor_cf(cprof.lat, cprof.altitude, cf_lat, title)
+    plt.savefig(title + '.png')
 
 
-def main(mask='out/200607/vcm_zonal*.nc4'):
+def main(mask='out/200607/vcm_zonal*.nc4', title=None):
     
-    show_files(mask)    
+    show_files(mask, title)
     plt.show()
     
 
