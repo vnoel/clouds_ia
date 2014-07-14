@@ -4,9 +4,9 @@
 # Created by VNoel on 2014-04-28
 
 import numpy as np
-import niceplots as nice
+# import niceplots as nice
 import matplotlib.pyplot as plt
-from vcm import aggregate_arrays_from_files
+from vcm import sum_arrays_from_files
 
 
 vcm_name = 'cal333+cal05+cal20+cal80+csat'
@@ -17,8 +17,6 @@ def pcolor_cf(x, y, vcmarray, title=None, label=None):
     from mpl_toolkits.basemap import Basemap
 
     m = Basemap()
-
-    plt.figure(figsize=[10,5])
     m.pcolormesh(x, y, vcmarray.T)
     m.drawcoastlines()
     m.drawparallels(np.r_[-90:90:30], labels=[1,0,0,0])
@@ -35,7 +33,6 @@ def zonal(lat, v, title=None):
     
     print lat.shape, v.shape
     
-    plt.figure(figsize=[10,5])
     plt.plot(lat, v)
     plt.title(title)
     plt.xlim(-90,90)
@@ -45,46 +42,24 @@ def zonal(lat, v, title=None):
     plt.grid()
 
 
-def show_files(files, layer, title, period):
+def show_files(files):
     
-    cprof, nprof = aggregate_arrays_from_files(files, [vcm_name + '_cprof_' + layer, 'nprof'])
-    print np.max(nprof), np.max(cprof)
-    
-    cf = np.ma.masked_where(nprof.values==0, 100. * cprof.values / nprof.values)
-    cf = np.ma.masked_invalid(cf)
-    
-    pcolor_cf(cprof.labels[0], cprof.labels[1], cprof.values, title=title + ' - cloud counts')
-    # nice.savefig('cc_%s_%s.png' % (layer, period))
-    pcolor_cf(cprof.labels[0], cprof.labels[1], nprof.values, title=title + ' - total counts')
-    # nice.savefig('tc_%s_2008_%s.png' % (layer, period))
-    pcolor_cf(cprof.labels[0], cprof.labels[1], cf, title=title + ' - cloud fraction', label='Cloud Fraction [%]')
-    nice.savefig('cf_%s_%s.png' % (layer, period))
-    
-    cfzonal = 100. * cprof.sum(axis='lon') / nprof.sum(axis='lon')
-    zonal(cprof.labels[1], cfzonal, title=title + '  fraction')
-    nice.savefig('cfz_%s_%s.png' % (layer, period))
-    #plt.clim(0,100)
+    dset = sum_arrays_from_files(files)
+    plt.figure(figsize=[10,8])
+    print np.max(dset['nprof'])
+    for i,layer in enumerate(['low', 'mid', 'high', 'total']):
+        nprof = dset['nprof']
+        cprof = dset[vcm_name + '_cprof_' + layer]
+        cf = np.ma.masked_invalid(100. * cprof.values / nprof.values)    
+        plt.subplot(2,2,i+1)
+        pcolor_cf(cprof.lon, cprof.lat, cf, title='cloud fraction - ' + layer, label='Cloud Fraction [%]')
+    plt.suptitle(files)
+    plt.savefig('maps.png')
 
 
-def main(layer='low', period='jja_2008'):
+def main(mask='out.daily/200607/*nc4'):
     
-    import glob
-    
-    monthkey = period[:3]
-    yearkey = period[4:]
-    
-    years = {'2008':[2008], 'all':range(2006,2015)}
-    months = {'jja':[6,7,8], 'djf':[12,1]}
-    
-    files = []
-    for year in years[yearkey]:
-        base = 'out.daily/2008%02d/*nc4'
-        for month in months[monthkey]:
-            x = glob.glob(base % month)
-            files.extend(x)
-    assert len(files) > 0
-    show_files(files, layer, layer + ' clouds - ' + period, period)
-    
+    show_files(mask)    
     plt.show()
     
 

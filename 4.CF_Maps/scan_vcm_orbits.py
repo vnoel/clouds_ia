@@ -4,7 +4,7 @@
 # Forked by VNoel on 2014-06-02
 
 from datetime import datetime, timedelta
-from cf_vcm import cf_file_from_vcm_orbits
+import cf_vcm
 import glob
 import os
 
@@ -28,9 +28,9 @@ def process_vcm_orbits_period(start, end, where):
             continue
         
         outpath = where + '%04d%02d/' % (current.year, current.month)
-        outname = 'cloud_maps_%04d-%02d-%02d.nc4' % (current.year, current.month, current.day)
+        outname = 'count_maps_%04d-%02d-%02d.nc4' % (current.year, current.month, current.day)
         
-        cf_file_from_vcm_orbits(vcm_files, layers, outname, where=outpath)
+        cf_vcm.cf_file_from_vcm_orbits(inpath + mask, layers, outname, where=outpath)
         
         current += timedelta(days=1)
 
