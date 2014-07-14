@@ -19,14 +19,13 @@ def process_vcm_orbits_period(start, end, where):
     while current < end:
         
         inpath = './in/%04d%02d/' % (current.year, current.month)
-        mask = 'vcm_%04d-%02d-%02d*.nc4' % (current.year, current.month, current.day)
-        print inpath + mask
+        mask = 'vcm_%04d-%02d-%02d*_v2.0.nc4' % (current.year, current.month, current.day)
         vcm_files = glob.glob(inpath + mask)
         if len(vcm_files) < 1:
             current += timedelta(days=1)
             continue
 
-        print current, ' : %d files' % (len(vcm_files))
+        print inpath + mask + ' : %d files' % (len(vcm_files))
         
         outpath = where + '%04d%02d/' % (current.year, current.month)
         outname = 'vcm_zonal_%04d-%02d-%02d.nc4' % (current.year, current.month, current.day)

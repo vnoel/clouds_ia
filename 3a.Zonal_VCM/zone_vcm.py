@@ -15,7 +15,7 @@ vcm_names = ['cal333+cal05+cal20+cal80+csat']
 def zone_vcm_from_vcm_orbit(vcm_orbit, latbins=latbins):
     
     # read data
-    print 'opening ' + vcm_orbit
+    #print 'opening ' + vcm_orbit
     v = vcm.VCM(vcm_orbit, verbose=False)
     
     nlat = latbins.shape[0]
