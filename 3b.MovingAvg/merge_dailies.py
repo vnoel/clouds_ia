@@ -9,16 +9,10 @@ import dimarray as da
 import netCDF4
 
 
-def sum_dailies(files):
-
-    dset = da.read_nc(files, axis='day', verbose=False)
-    dset.sum(axis='day')
-    return dset
-
-
 def dayfiles_to_windows(files, outfile):
     
-    window_sum = sum_dailies(files)
+    window_sum = da.read_nc(files, axis='day', verbose=False)
+    window_sum.sum(axis='day')
     #print 'Saving ' + outfile
     #print '   cf = ', 100. * np.sum(window_sum['cal333+cal05+cal20+cal80+csat_cprof']) / np.sum(window_sum['nprof'])
     cf = 100. * np.sum(window_sum['cal333+cal05+cal20+cal80+csat_cprof'])/np.sum(window_sum['nprof'])
