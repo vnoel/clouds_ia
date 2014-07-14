@@ -92,10 +92,12 @@ def reindex_vcms(vcm, vcm5, vcmc):
 
     # reindex all flags on the same 333m coordinates
     
+    time_axis = da.Axis(vcm['time'], 'tai_time')
+    alt_axis = da.Axis(vcm['altitude'], 'altitude')
     reindexed = da.Dataset()
-    reindexed['lon'] = da.DimArray(vcm['lon'], labels=(vcm['time'],), dims=('tai_time',))
-    reindexed['lat'] = da.DimArray(vcm['lat'], labels=(vcm['time'],), dims=('tai_time',))
-    reindexed['cal333'] = da.DimArray(vcm['cal333'], labels=(vcm['time'], vcm['altitude']), dims=('tai_time', 'altitude'))
+    reindexed['lon'] = da.DimArray(vcm['lon'], [time_axis,])
+    reindexed['lat'] = da.DimArray(vcm['lat'], [time_axis,])
+    reindexed['cal333'] = da.DimArray(vcm['cal333'], [time_axis, alt_axis])
     
     # remap CALIPSO flag
     for vcm_name in 'cal05','cal20', 'cal80':

@@ -68,18 +68,18 @@ def vcm_dataset_from_l2_orbit(filename):
     
     dset = da.Dataset()
     
-    time_axis = ('tai_time', tai_time)
-    alt_axis = ('altitude', vcm_alt)
+    time_axis = da.Axis(tai_time, 'tai_time')
+    alt_axis = da.Axis(vcm_alt, 'altitude')
     
     for havg_vcm in havgs_vcm:
         vcm = vcm_from_layers(nl, base, top, havg, ltype, tropo, only_havg=havg_vcm)
         vcm_name = 'cal%02d' % (havg_vcm)
-        dset[vcm_name] = da.DimArray(vcm, (time_axis, alt_axis))
+        dset[vcm_name] = da.DimArray(vcm, [time_axis, alt_axis])
     
-    dset['lon'] = da.DimArray(lon, (time_axis,))
-    dset['lat'] = da.DimArray(lat, (time_axis,))
-    dset['time_min'] = da.DimArray(tai_time_min, (time_axis,))
-    dset['time_max'] = da.DimArray(tai_time_max, (time_axis,))
+    dset['lon'] = da.DimArray(lon, [time_axis])
+    dset['lat'] = da.DimArray(lat, [time_axis])
+    dset['time_min'] = da.DimArray(tai_time_min, [time_axis])
+    dset['time_max'] = da.DimArray(tai_time_max, [time_axis])
 
     return dset
     
