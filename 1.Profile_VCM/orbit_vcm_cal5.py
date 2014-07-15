@@ -61,7 +61,7 @@ def vcm_dataset_from_l2_orbit(filename):
     ltype = l2.layer_type()
     tai_time_min, tai_time_max = l2.time_bounds()
     tropo = l2.tropopause_height()
-    elevation = l2.dem_surface_elevation()
+    elevation = l2.dem_surface_elevation()[:,1]
     l2.close()
     
     tropo[lat < -60] = 11.
