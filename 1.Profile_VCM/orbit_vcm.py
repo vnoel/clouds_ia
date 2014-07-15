@@ -56,6 +56,15 @@ def _find_geoprof_file(year, month, day, orbit_id):
         return None
 
 
+def remove_ground_clutter(vcm, elev, alt):
+    
+    elev += 1.
+    for i in np.r_[0:vcm.shape[0]]:
+        idx = (alt < elev[i])
+        vcm[i,:idx] = 0
+    return vcm
+    
+
 def remap_profiles(values, n1, n2, nprof333):
     '''
     remap values on 333m profile indices
@@ -109,6 +118,7 @@ def reindex_vcms(vcm, vcm5, vcmc):
         this_vcm = np.ones_like(vcm['cal333'], 'int8') * -1.
     else:
         this_vcm = remap_profiles(vcmc.values, n1, n2, nprof333)
+    this_vcm = remove_ground_clutter(this_vcm, vcm5['elevation'], vcm5['altitude'])
     reindexed['csat'] = da.DimArray(this_vcm, labels=reindexed['cal333'].labels, dims=reindexed['cal333'].dims)
     
     # Now we have

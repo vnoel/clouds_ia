@@ -61,6 +61,7 @@ def vcm_dataset_from_l2_orbit(filename):
     ltype = l2.layer_type()
     tai_time_min, tai_time_max = l2.time_bounds()
     tropo = l2.tropopause_height()
+    elevation = l2.dem_surface_elevation()
     l2.close()
     
     tropo[lat < -60] = 11.
@@ -80,6 +81,7 @@ def vcm_dataset_from_l2_orbit(filename):
     dset['lat'] = da.DimArray(lat, [time_axis])
     dset['time_min'] = da.DimArray(tai_time_min, [time_axis])
     dset['time_max'] = da.DimArray(tai_time_max, [time_axis])
+    dset['elevation'] = da.DimArray(elevation, [time_axis])
 
     return dset
     
