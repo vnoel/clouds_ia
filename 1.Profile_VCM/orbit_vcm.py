@@ -117,8 +117,8 @@ def reindex_vcms(vcm, vcm5, vcmc):
     if vcmc is None:
         this_vcm = np.ones_like(vcm['cal333'], 'int8') * -1.
     else:
+        vcmc.values = remove_ground_clutter(vcmc.values, vcm5['elevation'].values, vcm5['cal05'].altitude)
         this_vcm = remap_profiles(vcmc.values, n1, n2, nprof333)
-    this_vcm = remove_ground_clutter(this_vcm, vcm5['elevation'].values, vcm5['cal05'].altitude)
     reindexed['csat'] = da.DimArray(this_vcm, labels=reindexed['cal333'].labels, dims=reindexed['cal333'].dims)
     
     # Now we have
