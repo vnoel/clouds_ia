@@ -25,6 +25,7 @@ class VCM(object):
         self.lon = dimarrays['lon'].values
         self.lat = dimarrays['lat'].values
         self.data = {'cal333':dimarrays['cal333'].values}
+        self.time = dimarrays['cal333'].tai_time
         
     
     def get_vcm(self, mask):
@@ -50,6 +51,8 @@ class VCM(object):
         else:
             if mask not in self.data:
                 self.data[mask] = da.read_nc(self.filename, mask, axis='tai_time').values
+                if 'csat' in mask:
+                    self.data[mask] = np.clip(self.data[mask], 0, 3)
             output = self.data[mask]
 
         output = np.clip(output, 0, 3)
