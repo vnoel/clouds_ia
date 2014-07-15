@@ -19,7 +19,6 @@ def pcolor_cf(x, y, vcmarray, title=None, label=None):
     m = Basemap()
     m.pcolormesh(x, y, vcmarray.T)
     m.drawcoastlines()
-    m.drawparallels(np.r_[-90:90:30], labels=[1,0,0,0])
     plt.clim(0, 100)
     cb = plt.colorbar()
     if label is not None:
@@ -45,16 +44,31 @@ def zonal(lat, v, title=None):
 def show_files(files):
     
     dset = sum_arrays_from_files(files)
-    plt.figure(figsize=[10,8])
+    plt.figure(figsize=[11,5])
     print np.max(dset['nprof'])
     for i,layer in enumerate(['low', 'mid', 'high', 'total']):
         nprof = dset['nprof']
         cprof = dset[vcm_name + '_cprof_' + layer]
         cf = np.ma.masked_invalid(100. * cprof.values / nprof.values)    
         plt.subplot(2,2,i+1)
-        pcolor_cf(cprof.lon, cprof.lat, cf, title='cloud fraction - ' + layer, label='Cloud Fraction [%]')
+        pcolor_cf(cprof.lon, cprof.lat, cf, title=layer, label='Cloud Fraction [%]')
     plt.suptitle(files)
     plt.savefig('maps.png')
+    
+    plt.figure(figsize=[11,4])
+    for i, layer in enumerate(['low', 'mid', 'high', 'total']):
+        nprof = dset['nprof'].sum('lon')
+        cprof = dset[vcm_name + '_cprof_' + layer].sum('lon')
+        cf = np.ma.masked_invalid(100. * cprof.values / nprof.values)
+        plt.plot(cprof.lat, cf, lw=0.5, label=layer)
+    plt.ylabel('Cloud Fraction [%]')
+    plt.xlabel('Latitude')
+    plt.xlim(-90, 90)
+    plt.xticks(np.r_[-90:120:30])
+    plt.ylim(0, 100)
+    plt.grid()
+    plt.legend()
+    plt.savefig('zonal.png')
 
 
 def main(mask='out.daily/200607/*nc4'):
