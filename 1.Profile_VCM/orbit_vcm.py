@@ -61,7 +61,7 @@ def remove_ground_clutter(vcm, elev, alt):
     elev += 1.
     for i in np.r_[0:vcm.shape[0]]:
         idx = (alt < elev[i])
-        vcm[i,:idx] = 0
+        vcm[i,idx] = 0
     return vcm
     
 
