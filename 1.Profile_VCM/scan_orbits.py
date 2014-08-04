@@ -10,7 +10,7 @@ import os
 
 dayflag = 'night'
 
-l2func = {'night':calipso_local.l2_night_files, 'day':calipso_local.l2_day_files}[dayflag]
+l2func = {'night':calipso_local.l2_night_files, 'day':calipso_local.l2_day_files, 'all':calipso_local.l2_files}[dayflag]
 
 
 def process_l2_orbits_period(start, end, where):
@@ -20,9 +20,9 @@ def process_l2_orbits_period(start, end, where):
         outpath = where + '/%04d%02d/' % (current.year, current.month)
         l2files = l2func(current.year, current.month, current.day, havg=0.333)
         l2files.sort()
+        print l2files
         for l2file in l2files:
             vcm_file_from_333_orbit(current, l2file, where=outpath)        
-        # vcm_file_from_333_orbits(current, l2files, where=outpath)
         current += timedelta(days=1)
 
 
