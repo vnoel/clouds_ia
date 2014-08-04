@@ -32,9 +32,9 @@ def main(window):
         except ValueError:
             print 'No monthlies for {:04d}, skipping'.format(year)
             continue
-        vcm.reset_axis(filename_to_datetime, 'file', inplace=True)
+        # vcm.reset_axis(filename_to_datetime, 'file')
         nprof = da.read_nc(mask, 'nprof', axis='file')
-        nprof.reset_axis(filename_to_datetime, 'file', inplace=True)
+        # nprof.reset_axis(filename_to_datetime, 'file')
         fullvcm.append(vcm)
         fullnprof.append(nprof)
     vcm = da.concatenate(fullvcm, axis='file')

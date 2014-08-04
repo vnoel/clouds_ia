@@ -10,10 +10,11 @@ import niceplots as nice
 
 def pcolor_meridhov(time, lon, cf, title):
     plt.figure(figsize=[5,15])
-    time = date2num(time)
+    # time = date2num(time)
+    time = np.r_[0:cf.shape[0]]
     ax = plt.gca()
     plt.pcolormesh(lon, time, cf)
-    ax.yaxis.axis_date()
+    # ax.yaxis.axis_date()
     cb = plt.colorbar(orientation='horizontal', pad=0.05)
     cb.set_label('Cloud Fraction [%]')
     plt.xlim(-180, 180)
@@ -21,7 +22,7 @@ def pcolor_meridhov(time, lon, cf, title):
     plt.clim(0,30)
     plt.ylim(time[0], time[-1])
     plt.title(title)
-    plt.tight_layout()
+    # plt.tight_layout()
 
 def main(infile='series_40.npz'):
     
