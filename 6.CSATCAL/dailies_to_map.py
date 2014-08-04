@@ -5,6 +5,7 @@
 
 import dimarray as da
 import numpy as np
+import matplotlib.pyplot as plt
 
 lonbins = np.r_[-180:180:2.]
 latbins = np.r_[-90:90:2.]
@@ -12,7 +13,6 @@ latbins = np.r_[-90:90:2.]
 def map_show(lon, lat, h, nprof):
     
     from mpl_toolkits.basemap import Basemap
-    import matplotlib.pyplot as plt
     
     fraction = np.ma.masked_invalid(100. * h / nprof)
     
@@ -24,6 +24,7 @@ def map_show(lon, lat, h, nprof):
     cb = plt.colorbar()
     cb.set_label('Percents')
     plt.title('Fraction of cloudy csat-only profiles')
+    plt.savefig('map.pdf')
     plt.show()
     
 
@@ -34,6 +35,7 @@ def main(mask='out/200607/*nc4'):
     h, xx, yy = np.histogram2d(dset['lon'].values, dset['lat'].values, bins=[lonbins, latbins], weights=cloudy)
     nprof, xx, yy = np.histogram2d(dset['lon'].values, dset['lat'].values, bins=[lonbins, latbins])
     map_show(lonbins, latbins, h, nprof)
+
 
 
 if __name__ == '__main__':
