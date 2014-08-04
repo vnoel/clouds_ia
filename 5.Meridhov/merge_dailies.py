@@ -4,7 +4,7 @@
 # Forked by V. Noel [LMD/CNRS] on 2014-06-23
 
 from datetime import datetime, timedelta
-from vcm import aggregate_arrays_from_files
+from vcm import sum_arrays_from_files
 import dimarray as da
 
 
@@ -45,7 +45,7 @@ def main(year, window=40, step=1, indir='out.daily'):
             continue
 
         # average files
-        cprof, nprof = aggregate_arrays_from_files(files, [vcm_name + '_cprof', 'nprof'])
+        aggregated = sum_arrays_from_files(files, [vcm_name + '_cprof', 'nprof'])
        
         # create output filename
         fulloutdir = outdir + '/{:04d}/'.format(year)
@@ -54,7 +54,6 @@ def main(year, window=40, step=1, indir='out.daily'):
             
         outname = 'cf_%04d%02d%02d.nc4' % (current.year, current.month, current.day)
         outpath = fulloutdir + outname
-        aggregated = da.Dataset({vcm_name + '_cprof':cprof, 'nprof':nprof})
         print('Saving to ' + outpath)
         aggregated.write_nc(outpath, 'w')
         
